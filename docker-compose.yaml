@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14.5
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+  app:
+    build: .
+    container_name: fastapi-app
+    restart: on-failure
+    ports:
+      - "${APP_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    network_mode: host
