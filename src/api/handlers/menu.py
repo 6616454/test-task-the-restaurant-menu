@@ -10,7 +10,7 @@ from src.api.handlers.responses.menu import MenuDeleteResponse
 from src.domain.menu.exceptions.menu import MenuNotExists, MenuAlreadyExists, MenuDataEmpty
 from src.domain.menu.schemas.menu import OutputMenu, CreateMenu, UpdateMenu
 from src.domain.menu.usecases.menu import MenuService
-from src.infrastructure.db.repositories.holder import SQLAlchemyUoW
+from src.infrastructure.db.holder import SQLAlchemyUoW
 
 router = APIRouter(
     prefix='/api/v1/menus',

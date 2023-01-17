@@ -11,7 +11,7 @@ from src.domain.menu.exceptions.dish import DishNotExists, DishAlreadyExists, Di
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.schemas.dish import CreateDish, OutputDish, UpdateDish
 from src.domain.menu.usecases.dish import DishService
-from src.infrastructure.db.repositories.holder import SQLAlchemyUoW
+from src.infrastructure.db.holder import SQLAlchemyUoW
 
 router = APIRouter(
     prefix='/api/v1/menus',

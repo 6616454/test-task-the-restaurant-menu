@@ -12,7 +12,7 @@ from src.domain.menu.exceptions.menu import MenuNotExists
 from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
 from src.domain.menu.schemas.submenu import OutputSubMenu, CreateSubMenu, UpdateSubMenu
 from src.domain.menu.usecases.submenu import SubMenuService
-from src.infrastructure.db.repositories.holder import SQLAlchemyUoW
+from src.infrastructure.db.holder import SQLAlchemyUoW
 
 router = APIRouter(
     prefix='/api/v1/menus',
