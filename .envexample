@@ -1,0 +1,8 @@
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
+
+APP_PORT=8000
+
+POSTGRES_DB=postgres
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
