@@ -91,12 +91,13 @@ class DishService:
         return await DeleteDish(uow)(submenu_id, dish_id)
 
     @staticmethod
-    async def update_dish(uow: IMenuUoW, submenu_id: str, dish_id: str, data: UpdateDish) -> Dish:
-        new_data = data.dict(exclude_unset=True)
-
+    async def update_dish(uow: IMenuUoW, data: UpdateDish) -> Dish:
         try:
-            await PatchDish(uow)(dish_id, new_data)
-            updated_obj = await GetDish(uow)(submenu_id, dish_id)
+            await PatchDish(uow)(data.dish_id, data.dict(
+                exclude_unset=True,
+                exclude={'menu_id', 'submenu_id', 'dish_id'}
+            ))
+            updated_obj = await GetDish(uow)(data.submenu_id, data.dish_id)
             return updated_obj
         except ProgrammingError:
             raise DishDataEmpty

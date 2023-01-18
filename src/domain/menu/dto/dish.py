@@ -26,6 +26,9 @@ class CreateDish(BaseDish):
 
 
 class UpdateDish(BaseDish):
+    menu_id: str
+    submenu_id: str
+    dish_id: str
     title: str = None
     description: str = None
     price: float = None

@@ -12,3 +12,16 @@ class CreateRequestSubMenu(CreateRequestMenu):
 
 class CreateRequestDish(CreateRequestMenu):
     price: str
+
+
+class UpdateRequestMenu(CreateRequestMenu):
+    title: str = None
+    description: str = None
+
+
+class UpdateRequestSubMenu(UpdateRequestMenu):
+    pass
+
+
+class UpdateRequestDish(UpdateRequestMenu):
+    price: str = None

@@ -7,7 +7,7 @@ from src.domain.menu.exceptions.menu import MenuNotExists
 from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import SubMenuUseCase
-from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, BaseSubMenu
+from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, BaseSubMenu, UpdateSubMenu
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.submenu import SubMenu
 
@@ -76,7 +76,7 @@ class SubMenuService:
         return await DeleteSubMenu(uow)(menu_id, submenu_id)
 
     @staticmethod
-    async def create_submenu(uow: IMenuUoW,  data: CreateSubMenu) -> OutputSubMenu:
+    async def create_submenu(uow: IMenuUoW, data: CreateSubMenu) -> OutputSubMenu:
         try:
             if await uow.menu_holder.menu_repo.get_by_id(data.menu_id):
                 return await AddSubMenu(uow)(data)
@@ -94,12 +94,12 @@ class SubMenuService:
             dishes_count=await self._get_len(obj.dishes),
         )
 
-    async def update_submenu(self, uow: IMenuUoW, menu_id: str, submenu_id: str, data: BaseSubMenu) -> OutputSubMenu:
-        new_data = data.dict(exclude_unset=True)
-
+    async def update_submenu(self, uow: IMenuUoW, data: UpdateSubMenu) -> OutputSubMenu:
         try:
-            await PatchSubMenu(uow)(submenu_id, new_data)
-            updated_obj = await GetSubMenu(uow)(menu_id, submenu_id)
+            await PatchSubMenu(uow)(data.submenu_id, data.dict(
+                exclude_unset=True, exclude={'submenu_id', 'menu_id'}
+            ))
+            updated_obj = await GetSubMenu(uow)(data.menu_id, data.submenu_id)
             return await self._get_ready_info(updated_obj)
         except ProgrammingError:
             raise SubMenuDataEmpty

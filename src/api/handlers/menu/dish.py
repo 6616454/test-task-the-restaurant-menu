@@ -4,7 +4,7 @@ from fastapi import Depends, Response, status, APIRouter
 from pydantic import UUID4
 
 from src.api.di import uow_provider, dish_service_stub
-from src.api.handlers.requests.menu import CreateRequestDish
+from src.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
 from src.api.handlers.responses.exceptions import DishNotFoundError, DishAlreadyExistsError, SubMenuNotFoundError, \
     DishEmptyRequestBodyError
 from src.api.handlers.responses.menu import DishDeleteResponse
@@ -83,7 +83,9 @@ async def create_dish(
         dish_service: DishService = Depends(dish_service_stub)
 ) -> Union[OutputDish, SubMenuNotFoundError, DishAlreadyExistsError]:
     try:
-        return await dish_service.create_dish(uow, CreateDish(menu_id=menu_id, submenu_id=submenu_id, **data.dict()))
+        return await dish_service.create_dish(uow, CreateDish(
+            menu_id=str(menu_id), submenu_id=str(submenu_id), **data.dict()
+        ))
     except SubMenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return SubMenuNotFoundError()
@@ -130,16 +132,21 @@ async def delete_dish(
         }
     }
 )
-async def update_submenu(
+async def update_dish(
         menu_id: UUID4,
         submenu_id: UUID4,
         dish_id: UUID4,
-        update_data: UpdateDish,
+        update_data: UpdateRequestDish,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
 ) -> Union[OutputDish, DishNotFoundError, DishEmptyRequestBodyError]:
     try:
-        return await dish_service.update_dish(uow, str(submenu_id), str(dish_id), update_data)
+        return await dish_service.update_dish(uow, UpdateDish(
+            menu_id=str(menu_id),
+            submenu_id=str(submenu_id),
+            dish_id=str(dish_id),
+            **update_data.dict()
+        ))
     except DishDataEmpty:
         return DishEmptyRequestBodyError()
     except DishNotExists:

@@ -5,7 +5,7 @@ from pydantic import UUID4
 
 from src.api.di import uow_provider
 from src.api.di.providers.services import submenu_service_stub
-from src.api.handlers.requests.menu import CreateRequestSubMenu
+from src.api.handlers.requests.menu import CreateRequestSubMenu, UpdateRequestSubMenu
 from src.api.handlers.responses.exceptions import SubMenuNotFoundError, SubMenuAlreadyExistsError, \
     SubMenuEmptyRequestBodyError, MenuNotFoundError
 from src.api.handlers.responses.menu import SubMenuDeleteResponse
@@ -136,12 +136,16 @@ async def delete_submenu(
 async def update_submenu(
         menu_id: UUID4,
         submenu_id: UUID4,
-        update_data: UpdateSubMenu,
+        update_data: UpdateRequestSubMenu,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
 ) -> Union[OutputSubMenu, SubMenuNotFoundError, SubMenuEmptyRequestBodyError]:
     try:
-        return await submenu_service.update_submenu(uow, str(menu_id), str(submenu_id), update_data)
+        return await submenu_service.update_submenu(uow, UpdateSubMenu(
+            menu_id=str(menu_id),
+            submenu_id=str(submenu_id),
+            **update_data.dict()
+        ))
     except SubMenuDataEmpty:
         return SubMenuEmptyRequestBodyError()
     except SubMenuNotExists:
