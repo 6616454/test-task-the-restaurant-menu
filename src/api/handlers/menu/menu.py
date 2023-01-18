@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, status, Response
 from pydantic import UUID4
 
 from src.api.di import uow_provider, menu_service_stub
-from src.api.handlers.requests.menu import CreateRequestMenu
+from src.api.handlers.requests.menu import CreateRequestMenu, UpdateRequestMenu
 from src.api.handlers.responses.exceptions import MenuNotFoundError, MenuAlreadyExistsError, \
     MenuEmptyRequestBodyError
 from src.api.handlers.responses.menu import MenuDeleteResponse
@@ -110,12 +110,15 @@ async def delete_menu(
 )
 async def update_menu(
         menu_id: UUID4,
-        update_data: UpdateMenu,
+        update_data: UpdateRequestMenu,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
 ) -> Union[OutputMenu, MenuNotFoundError, MenuEmptyRequestBodyError]:
     try:
-        return await menu_service.update_menu(uow, str(menu_id), update_data)
+        return await menu_service.update_menu(uow, UpdateMenu(
+            menu_id=str(menu_id),
+            **update_data.dict()
+        ))
     except MenuDataEmpty:
         return MenuEmptyRequestBodyError()
     except MenuNotExists:

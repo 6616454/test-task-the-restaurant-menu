@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -20,7 +18,7 @@ class MenuRepository(BaseRepository[Menu]):
         result = (await self.session.execute(query)).scalars().unique()
         return result
 
-    async def get_by_id_all(self, id_: UUID, load: bool) -> Menu:
+    async def get_by_id_all(self, id_: str, load: bool) -> Menu:
         query = select(self.model).where(self.model.id == id_)
         if load:
             query = query.options(
