@@ -1,5 +1,4 @@
 from typing import TypeVar, Generic, Type
-from uuid import UUID
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +14,7 @@ class BaseRepository(Generic[Model]):
         self.model = model
         self.session = session
 
-    async def get_by_id(self, id_: UUID) -> Model:
+    async def get_by_id(self, id_: str) -> Model:
         query = select(self.model).where(self.model.id == id_)
         return (await self.session.execute(query)).scalar_one_or_none()
 
@@ -23,7 +22,7 @@ class BaseRepository(Generic[Model]):
         result = await self.session.execute(select(self.model))
         return result.scalars().all()
 
-    async def update_obj(self, id_: UUID, **kwargs) -> None:
+    async def update_obj(self, id_: str, **kwargs) -> None:
         query = update(self.model).where(self.model.id == id_).values(
             kwargs)
         await self.session.execute(query)

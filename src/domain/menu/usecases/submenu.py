@@ -104,7 +104,7 @@ class SubMenuService:
         except ProgrammingError:
             raise SubMenuDataEmpty
 
-    async def get_submenus(self, uow: IMenuUoW, menu_id: UUID) -> list[OutputSubMenu]:
+    async def get_submenus(self, uow: IMenuUoW, menu_id: str) -> list[OutputSubMenu]:
         submenus = await GetSubMenus(uow)(menu_id)
 
         if submenus:
@@ -113,6 +113,6 @@ class SubMenuService:
 
         raise MenuNotExists
 
-    async def get_submenu(self, uow: IMenuUoW, menu_id: UUID, submenu_id: UUID) -> OutputSubMenu:
+    async def get_submenu(self, uow: IMenuUoW, menu_id: str, submenu_id: str) -> OutputSubMenu:
         submenu = await GetSubMenu(uow)(menu_id, submenu_id)
         return await self._get_ready_info(submenu)
