@@ -6,7 +6,7 @@ from src.domain.menu.exceptions.dish import DishNotExists, DishAlreadyExists, Di
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import DishUseCase
-from src.domain.menu.schemas.dish import CreateDish, UpdateDish
+from src.domain.menu.dto.dish import CreateDish, UpdateDish
 from src.infrastructure.db.models.dish import Dish
 
 logger = logging.getLogger('main_logger')
@@ -30,12 +30,12 @@ class GetDish(DishUseCase):
 
 
 class AddDish(DishUseCase):
-    async def __call__(self, submenu_id: str, data: CreateDish) -> Dish:
+    async def __call__(self, data: CreateDish) -> Dish:
         new_dish = self.uow.menu_holder.dish_repo.model(
             title=data.title,
             description=data.description,
             price=data.price,
-            submenu_id=submenu_id
+            submenu_id=data.submenu_id
         )
 
         await self.uow.menu_holder.dish_repo.save(new_dish)
@@ -78,10 +78,10 @@ class DishService:
         return await GetDish(uow)(submenu_id, dish_id)
 
     @staticmethod
-    async def create_dish(uow: IMenuUoW, menu_id: str, submenu_id: str, data: CreateDish) -> Dish:
+    async def create_dish(uow: IMenuUoW, data: CreateDish) -> Dish:
         try:
-            if await uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
-                return await AddDish(uow)(submenu_id, data)
+            if await uow.menu_holder.submenu_repo.get_by_menu_id(data.menu_id, load=False):
+                return await AddDish(uow)(data)
             raise SubMenuNotExists
         except IntegrityError:
             raise DishAlreadyExists

@@ -1,9 +1,10 @@
-from pydantic import BaseModel, validator, UUID4
+from pydantic import validator, UUID4
+
+from src.domain.common.dto.base import DTO
+from src.domain.menu.dto.menu import BaseMenu
 
 
-class BaseDish(BaseModel):
-    title: str
-    description: str
+class BaseDish(BaseMenu):
     price: str
 
     @validator('price')
@@ -11,19 +12,17 @@ class BaseDish(BaseModel):
         return '{:.2f}'.format(round(float(v), 2))
 
 
-class OutputDish(BaseModel):
+class OutputDish(DTO):
     # Продублировал отдельно, чтобы подогнать под тесты
     id: UUID4
     title: str
     description: str
     price: str
 
-    class Config:
-        orm_mode = True
-
 
 class CreateDish(BaseDish):
-    pass
+    menu_id: str
+    submenu_id: str
 
 
 class UpdateDish(BaseDish):

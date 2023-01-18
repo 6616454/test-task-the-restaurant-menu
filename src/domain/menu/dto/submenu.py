@@ -1,9 +1,10 @@
 from pydantic import BaseModel, UUID4
 
+from src.domain.menu.dto.menu import BaseMenu
 
-class BaseSubMenu(BaseModel):
-    title: str
-    description: str
+
+class BaseSubMenu(BaseMenu):
+    pass
 
 
 class OutputSubMenu(BaseModel):
@@ -19,7 +20,7 @@ class OutputSubMenu(BaseModel):
 
 
 class CreateSubMenu(BaseSubMenu):
-    pass
+    menu_id: str
 
 
 class UpdateSubMenu(BaseSubMenu):

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from src.domain.menu.exceptions.menu import MenuAlreadyExists, MenuNotExists, MenuDataEmpty
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import MenuUseCase
-from src.domain.menu.schemas.menu import CreateMenu, OutputMenu, BaseMenu
+from src.domain.menu.dto.menu import CreateMenu, OutputMenu, BaseMenu
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
 

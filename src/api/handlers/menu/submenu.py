@@ -5,12 +5,13 @@ from pydantic import UUID4
 
 from src.api.di import uow_provider
 from src.api.di.providers.services import submenu_service_stub
+from src.api.handlers.requests.menu import CreateRequestSubMenu
 from src.api.handlers.responses.exceptions import SubMenuNotFoundError, SubMenuAlreadyExistsError, \
     SubMenuEmptyRequestBodyError, MenuNotFoundError
-from src.api.handlers.responses.submenu import SubMenuDeleteResponse
+from src.api.handlers.responses.menu import SubMenuDeleteResponse
 from src.domain.menu.exceptions.menu import MenuNotExists
 from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
-from src.domain.menu.schemas.submenu import OutputSubMenu, CreateSubMenu, UpdateSubMenu
+from src.domain.menu.dto.submenu import OutputSubMenu, CreateSubMenu, UpdateSubMenu
 from src.domain.menu.usecases.submenu import SubMenuService
 from src.infrastructure.db.holder import SQLAlchemyUoW
 
@@ -79,14 +80,14 @@ async def get_submenu(
     status_code=status.HTTP_201_CREATED
 )
 async def create_submenu(
-        data: CreateSubMenu,
+        data: CreateRequestSubMenu,
         menu_id: UUID4,
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: SubMenuService = Depends(submenu_service_stub)
 ) -> Union[OutputSubMenu, SubMenuAlreadyExistsError, MenuNotFoundError]:
     try:
-        return await menu_service.create_submenu(uow, str(menu_id), data)
+        return await menu_service.create_submenu(uow, CreateSubMenu(menu_id=str(menu_id), **data.dict()))
     except SubMenuAlreadyExists:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return SubMenuAlreadyExistsError()

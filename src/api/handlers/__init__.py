@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from src.api.handlers.menu import router as menu_router
-from src.api.handlers.submenu import router as sub_menu_router
-from src.api.handlers.dish import router as dish_router
+from src.api.handlers.menu.menu import router as menu_router
+from src.api.handlers.menu.submenu import router as sub_menu_router
+from src.api.handlers.menu.dish import router as dish_router
 
 
 def setup_routes(router: APIRouter):

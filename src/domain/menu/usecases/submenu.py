@@ -7,7 +7,7 @@ from src.domain.menu.exceptions.menu import MenuNotExists
 from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import SubMenuUseCase
-from src.domain.menu.schemas.submenu import CreateSubMenu, OutputSubMenu, BaseSubMenu
+from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, BaseSubMenu
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.submenu import SubMenu
 
@@ -29,11 +29,11 @@ class GetSubMenus(SubMenuUseCase):
 
 
 class AddSubMenu(SubMenuUseCase):
-    async def __call__(self, menu_id: UUID, data: CreateSubMenu) -> SubMenu:
+    async def __call__(self, data: CreateSubMenu) -> SubMenu:
         menu = self.uow.menu_holder.submenu_repo.model(
             title=data.title,
             description=data.description,
-            menu_id=menu_id
+            menu_id=data.menu_id
         )
 
         await self.uow.menu_holder.submenu_repo.save(menu)
@@ -76,10 +76,10 @@ class SubMenuService:
         return await DeleteSubMenu(uow)(menu_id, submenu_id)
 
     @staticmethod
-    async def create_submenu(uow: IMenuUoW, menu_id: UUID, data: CreateSubMenu) -> OutputSubMenu:
+    async def create_submenu(uow: IMenuUoW,  data: CreateSubMenu) -> OutputSubMenu:
         try:
-            if await uow.menu_holder.menu_repo.get_by_id(menu_id):
-                return await AddSubMenu(uow)(menu_id, data)
+            if await uow.menu_holder.menu_repo.get_by_id(data.menu_id):
+                return await AddSubMenu(uow)(data)
             raise MenuNotExists
         except IntegrityError:
             await uow.rollback()

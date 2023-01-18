@@ -1,12 +1,14 @@
-from pydantic import BaseModel, UUID4
+from pydantic import UUID4
+
+from src.domain.common.dto.base import DTO
 
 
-class BaseMenu(BaseModel):
+class BaseMenu(DTO):
     title: str
     description: str
 
 
-class OutputMenu(BaseModel):
+class OutputMenu(DTO):
     # Продублировал отдельно, чтобы подогнать под тесты
 
     id: UUID4
@@ -14,9 +16,6 @@ class OutputMenu(BaseModel):
     description: str
     submenus_count: int = 0
     dishes_count: int = 0
-
-    class Config:
-        orm_mode = True
 
 
 class CreateMenu(BaseMenu):

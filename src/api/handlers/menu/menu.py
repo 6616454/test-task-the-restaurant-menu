@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, status, Response
 from pydantic import UUID4
 
 from src.api.di import uow_provider, menu_service_stub
+from src.api.handlers.requests.menu import CreateRequestMenu
 from src.api.handlers.responses.exceptions import MenuNotFoundError, MenuAlreadyExistsError, \
     MenuEmptyRequestBodyError
 from src.api.handlers.responses.menu import MenuDeleteResponse
 from src.domain.menu.exceptions.menu import MenuNotExists, MenuAlreadyExists, MenuDataEmpty
-from src.domain.menu.schemas.menu import OutputMenu, CreateMenu, UpdateMenu
+from src.domain.menu.dto.menu import OutputMenu, UpdateMenu, CreateMenu
 from src.domain.menu.usecases.menu import MenuService
 from src.infrastructure.db.holder import SQLAlchemyUoW
 
@@ -59,13 +60,13 @@ async def get_menus(
     status_code=status.HTTP_201_CREATED
 )
 async def create_menu(
-        data: CreateMenu,
+        data: CreateRequestMenu,
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
 ) -> Union[OutputMenu, MenuAlreadyExistsError]:
     try:
-        return await menu_service.create_menu(uow, data)
+        return await menu_service.create_menu(uow, CreateMenu(**data.dict()))
     except MenuAlreadyExists:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return MenuAlreadyExistsError()
