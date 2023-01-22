@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     database_url: str
     echo_mode: bool = False
 
+    # Test settings
+    database_test_url: str
+
     class Config:
         env_file = '.env'
 
