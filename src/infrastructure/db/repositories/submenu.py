@@ -24,14 +24,14 @@ class SubMenuRepository(BaseRepository[SubMenu]):
         result = (await self.session.execute(query)).scalars().unique()
         return result
 
-    async def get_by_menu_id(self, menu_id: str, load=True) -> list[SubMenu]:
+    async def get_by_menu_id(self, menu_id: str, load: bool) -> list[SubMenu]:
         query = select(self.model).where(self.model.menu_id == menu_id)
         if load:
             query = query.options(joinedload(self.model.dishes))
             return (await self.session.execute(query)).scalars().unique()
         return (await self.session.execute(query)).scalars().all()
 
-    async def get_by_menu_and_id(self, menu_id: str, submenu_id: str, load=True) -> SubMenu:
+    async def get_by_menu_and_id(self, menu_id: str, submenu_id: str, load: bool) -> SubMenu:
         query = select(self.model).where(and_(self.model.menu_id == menu_id), self.model.id == submenu_id)
         if load:
             query = query.options(joinedload(self.model.dishes))

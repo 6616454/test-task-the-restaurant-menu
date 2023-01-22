@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from src.domain.menu.exceptions.menu import MenuAlreadyExists, MenuNotExists, MenuDataEmpty
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import MenuUseCase
-from src.domain.menu.dto.menu import CreateMenu, OutputMenu, BaseMenu, UpdateMenu
+from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
 
@@ -14,7 +14,7 @@ logger = logging.getLogger('main_logger')
 
 
 class GetMenu(MenuUseCase):
-    async def __call__(self, menu_id: str, load: bool = True) -> Menu:
+    async def __call__(self, menu_id: str, load: bool) -> Menu:
         menu = await self.uow.menu_holder.menu_repo.get_by_id_all(menu_id, load)
         if menu:
             return menu
@@ -70,7 +70,7 @@ class MenuService:
             counter = 0
 
             for sub_menu in sub_menus:
-                for dish in sub_menu.dishes:
+                for _ in sub_menu.dishes:
                     counter += 1
 
             return counter
@@ -101,8 +101,8 @@ class MenuService:
 
     async def update_menu(self, uow: IMenuUoW, data: UpdateMenu) -> OutputMenu:
         try:
-            await PatchMenu(uow)(data.menu_id, data.dict(exclude_unset=True, exclude={'menu_id'}))
-            updated_obj = await GetMenu(uow)(data.menu_id)
+            await PatchMenu(uow)(data.menu_id, data.dict(exclude_none=True, exclude={'menu_id'}))
+            updated_obj = await GetMenu(uow)(data.menu_id, load=True)
             return await self._get_ready_info(updated_obj)
         except ProgrammingError:
             raise MenuDataEmpty
@@ -118,5 +118,5 @@ class MenuService:
         return menus
 
     async def get_menu(self, uow: IMenuUoW, menu_id: str) -> OutputMenu:
-        menu = await GetMenu(uow)(menu_id)
+        menu = await GetMenu(uow)(menu_id, load=True)
         return await self._get_ready_info(menu)

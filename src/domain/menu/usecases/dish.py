@@ -17,7 +17,7 @@ class GetDishes(DishUseCase):
         if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
             return await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
 
-        return []
+        raise SubMenuNotExists
 
 
 class GetDish(DishUseCase):
@@ -94,7 +94,7 @@ class DishService:
     async def update_dish(uow: IMenuUoW, data: UpdateDish) -> Dish:
         try:
             await PatchDish(uow)(data.dish_id, data.dict(
-                exclude_unset=True,
+                exclude_none=True,
                 exclude={'menu_id', 'submenu_id', 'dish_id'}
             ))
             updated_obj = await GetDish(uow)(data.submenu_id, data.dish_id)

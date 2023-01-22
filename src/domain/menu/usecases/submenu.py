@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -7,7 +6,7 @@ from src.domain.menu.exceptions.menu import MenuNotExists
 from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import SubMenuUseCase
-from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, BaseSubMenu, UpdateSubMenu
+from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, UpdateSubMenu
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.submenu import SubMenu
 
@@ -15,17 +14,19 @@ logger = logging.getLogger('main_logger')
 
 
 class GetSubMenu(SubMenuUseCase):
-    async def __call__(self, menu_id: UUID, submenu_id: UUID) -> SubMenu:
-        submenu = await self.uow.menu_holder.submenu_repo.get_by_menu_and_id(menu_id, submenu_id)
+    async def __call__(self, menu_id: str, submenu_id: str, load: bool) -> SubMenu:
+        submenu = await self.uow.menu_holder.submenu_repo.get_by_menu_and_id(menu_id, submenu_id, load)
         if submenu:
             return submenu
         raise SubMenuNotExists
 
 
 class GetSubMenus(SubMenuUseCase):
-    async def __call__(self, menu_id: UUID) -> list[SubMenu]:
+    async def __call__(self, menu_id: str) -> list[SubMenu]:
         if await self.uow.menu_holder.menu_repo.get_by_id(menu_id):
-            return await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id)
+            return await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=True)
+
+        raise MenuNotExists
 
 
 class AddSubMenu(SubMenuUseCase):
@@ -97,9 +98,9 @@ class SubMenuService:
     async def update_submenu(self, uow: IMenuUoW, data: UpdateSubMenu) -> OutputSubMenu:
         try:
             await PatchSubMenu(uow)(data.submenu_id, data.dict(
-                exclude_unset=True, exclude={'submenu_id', 'menu_id'}
+                exclude_none=True, exclude={'submenu_id', 'menu_id'}
             ))
-            updated_obj = await GetSubMenu(uow)(data.menu_id, data.submenu_id)
+            updated_obj = await GetSubMenu(uow)(data.menu_id, data.submenu_id, load=True)
             return await self._get_ready_info(updated_obj)
         except ProgrammingError:
             raise SubMenuDataEmpty
@@ -114,5 +115,5 @@ class SubMenuService:
         raise MenuNotExists
 
     async def get_submenu(self, uow: IMenuUoW, menu_id: str, submenu_id: str) -> OutputSubMenu:
-        submenu = await GetSubMenu(uow)(menu_id, submenu_id)
+        submenu = await GetSubMenu(uow)(menu_id, submenu_id, load=True)
         return await self._get_ready_info(submenu)

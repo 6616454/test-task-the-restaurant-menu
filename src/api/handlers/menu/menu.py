@@ -111,6 +111,7 @@ async def delete_menu(
 async def update_menu(
         menu_id: UUID4,
         update_data: UpdateRequestMenu,
+        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
 ) -> Union[OutputMenu, MenuNotFoundError, MenuEmptyRequestBodyError]:
@@ -122,4 +123,5 @@ async def update_menu(
     except MenuDataEmpty:
         return MenuEmptyRequestBodyError()
     except MenuNotExists:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()

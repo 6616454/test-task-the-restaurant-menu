@@ -26,4 +26,3 @@ class MenuRepository(BaseRepository[Menu]):
             )
         result = (await self.session.execute(query)).scalar()
         return result
-

@@ -34,12 +34,14 @@ router = APIRouter(
 )
 async def get_submenus(
         menu_id: UUID4,
+        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
 ) -> Union[list[OutputSubMenu], MenuNotFoundError]:
     try:
         return await submenu_service.get_submenus(uow, str(menu_id))
     except MenuNotExists:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()
 
 
