@@ -170,12 +170,12 @@ class TestDishHandlers:
                     'price': 'string'
                 },
                 {
-                    'detail': 'the price of the dish must be a floating point number'
+                    'detail': 'The price of the dish must be a floating point number'
                 },
                 422
         ),
     ])
-    async def test_invalid_create_submenu(
+    async def test_invalid_create_dish(
             self,
             client,
             menu_id,
@@ -295,6 +295,24 @@ class TestDishHandlers:
                     'price': '14.50'
                 },
                 200
+        ),
+        (
+                '911577a1-fbf5-4931-b075-e7641c84121a',
+                {},
+                {
+                    'detail': 'dish_data request body empty'
+                },
+                400
+        ),
+        (
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {
+                'price': 'string'
+            },
+            {
+                'detail': 'The price of the dish must be a floating point number'
+            },
+            422
         )
     ])
     async def test_patch_dish(
