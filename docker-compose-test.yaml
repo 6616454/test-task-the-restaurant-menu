@@ -1,38 +1,41 @@
 version: '3.8'
 
 services:
-  db:
+  test_db:
     image: postgres:15.1-alpine
     restart: on-failure
     env_file:
       - .env
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB2}"
     ports:
       - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}" ]
+      test: [ "CMD-SHELL", "pg_isready -d ${POSTGRES_DB2} -U ${POSTGRES_USER}" ]
       interval: 5s
       timeout: 20s
       retries: 100
     networks:
-      custom:
+      custom_test:
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      target: prod
-    container_name: fastapi-app
-    restart: on-failure
+      target: test
+    container_name: fastapi-app-test
     ports:
       - "${APP_PORT}:8000"
     env_file:
       - .env
+    environment:
+      - TEST=1
     depends_on:
-      db:
+      test_db:
         condition: service_healthy
     networks:
-      custom:
+      custom_test:
 
 networks:
-  custom:
+  custom_test:
     driver: bridge

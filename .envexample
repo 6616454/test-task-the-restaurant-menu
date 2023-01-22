@@ -1,8 +1,10 @@
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
+DATABASE_TEST_URL=postgresql+asyncpg://postgres:postgres@test_db:5432/test_db
 
 APP_PORT=8000
 
 POSTGRES_DB=postgres
+POSTGRES_DB2=test_db
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
