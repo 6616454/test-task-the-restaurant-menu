@@ -9,6 +9,9 @@ class BaseDish(BaseMenu):
 
     @validator('price')
     def price_validator(cls, v):
+        if v is None:
+            return
+
         return '{:.2f}'.format(round(float(v), 2))
 
 
@@ -31,4 +34,4 @@ class UpdateDish(BaseDish):
     dish_id: str
     title: str = None
     description: str = None
-    price: float = None
+    price: str = None

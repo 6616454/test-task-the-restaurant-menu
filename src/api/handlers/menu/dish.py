@@ -1,12 +1,12 @@
 from typing import Union, Optional
 
 from fastapi import Depends, Response, status, APIRouter
-from pydantic import UUID4
+from pydantic import UUID4, ValidationError
 
 from src.api.di import uow_provider, dish_service_stub
 from src.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
 from src.api.handlers.responses.exceptions import DishNotFoundError, DishAlreadyExistsError, SubMenuNotFoundError, \
-    DishEmptyRequestBodyError
+    DishEmptyRequestBodyError, DishPriceValidationError
 from src.api.handlers.responses.menu import DishDeleteResponse
 from src.domain.menu.exceptions.dish import DishNotExists, DishAlreadyExists, DishDataEmpty
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
@@ -33,10 +33,15 @@ router = APIRouter(
 async def get_dishes(
         menu_id: UUID4,
         submenu_id: UUID4,
+        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Optional[list[OutputDish]]:
-    return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))
+) -> Union[list[OutputDish], SubMenuNotFoundError]:
+    try:
+        return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))
+    except SubMenuNotExists:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return SubMenuNotFoundError()
 
 
 @router.get(
@@ -70,6 +75,9 @@ async def get_dish(
         },
         status.HTTP_404_NOT_FOUND: {
             'model': SubMenuNotFoundError
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            'model': DishPriceValidationError
         }
     },
     status_code=status.HTTP_201_CREATED
@@ -81,7 +89,7 @@ async def create_dish(
         data: CreateRequestDish,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[OutputDish, SubMenuNotFoundError, DishAlreadyExistsError]:
+) -> Union[OutputDish, SubMenuNotFoundError, DishAlreadyExistsError, DishPriceValidationError]:
     try:
         return await dish_service.create_dish(uow, CreateDish(
             menu_id=str(menu_id), submenu_id=str(submenu_id), **data.dict()
@@ -92,6 +100,9 @@ async def create_dish(
     except DishAlreadyExists:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return DishAlreadyExistsError()
+    except ValidationError:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return DishPriceValidationError()
 
 
 @router.delete(
@@ -137,6 +148,7 @@ async def update_dish(
         submenu_id: UUID4,
         dish_id: UUID4,
         update_data: UpdateRequestDish,
+        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
 ) -> Union[OutputDish, DishNotFoundError, DishEmptyRequestBodyError]:
@@ -148,6 +160,8 @@ async def update_dish(
             **update_data.dict()
         ))
     except DishDataEmpty:
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return DishEmptyRequestBodyError()
     except DishNotExists:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return DishNotFoundError()

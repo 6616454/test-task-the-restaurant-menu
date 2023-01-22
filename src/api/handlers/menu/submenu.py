@@ -139,6 +139,7 @@ async def update_submenu(
         menu_id: UUID4,
         submenu_id: UUID4,
         update_data: UpdateRequestSubMenu,
+        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
 ) -> Union[OutputSubMenu, SubMenuNotFoundError, SubMenuEmptyRequestBodyError]:
@@ -149,6 +150,8 @@ async def update_submenu(
             **update_data.dict()
         ))
     except SubMenuDataEmpty:
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return SubMenuEmptyRequestBodyError()
     except SubMenuNotExists:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return SubMenuNotFoundError()

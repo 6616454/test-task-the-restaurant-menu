@@ -37,3 +37,7 @@ class DishAlreadyExistsError(ApiError):
 
 class DishEmptyRequestBodyError(ApiError):
     detail = Field('dish_data request body empty', const=True)
+
+
+class DishPriceValidationError(ApiError):
+    detail = Field('the price of the dish must be a floating point number')
