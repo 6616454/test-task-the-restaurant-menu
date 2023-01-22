@@ -50,7 +50,7 @@ def client() -> Generator[TestClient, Any, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def async_session_test() -> sessionmaker:
-    yield create_pool(get_settings().database_test_url, echo_mode=True)
+    yield create_pool(get_settings().database_test_url, echo_mode=False)
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
