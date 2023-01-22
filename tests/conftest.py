@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 from typing import Generator, Any
 
 import pytest
@@ -51,15 +50,15 @@ def client() -> Generator[TestClient, Any, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def async_session_test() -> sessionmaker:
-    yield create_pool(get_settings().database_test_url, echo_mode=False)
+    yield create_pool(get_settings().database_test_url, echo_mode=True)
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def clean_tables(async_session_test):
     tables = ('menu', 'submenu', 'dish')
     async with async_session_test() as session:
-        for table_for_cleaning in tables:
-            statement = text(f'''TRUNCATE TABLE {table_for_cleaning} CASCADE;''')
+        for table in tables:
+            statement = text(f'''TRUNCATE TABLE {table} CASCADE;''')
             await session.execute(statement)
             await session.commit()
 
@@ -186,19 +185,19 @@ def menu_data():
 @pytest.fixture
 def submenu_data():
     return {
-        "submenu_id": "5f740121-65d6-490b-984c-1cb28a4b43fa",
-        "title": "some_title",
-        "description": "some_description",
-        "menu_id": "b61ec7b4-5b25-41de-9d41-f00331b04885",
+        'submenu_id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
+        'title': 'some_title',
+        'description': 'some_description',
+        'menu_id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
     }
 
 
 @pytest.fixture
 def dish_data():
     return {
-        "dish_id": "911577a1-fbf5-4931-b075-e7641c84121a",
-        "title": "some_title",
-        "description": "some_description",
-        "price": '14.50',
-        "submenu_id": "5f740121-65d6-490b-984c-1cb28a4b43fa",
+        'dish_id': '911577a1-fbf5-4931-b075-e7641c84121a',
+        'title': 'some_title',
+        'description': 'some_description',
+        'price': '14.50',
+        'submenu_id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
     }
