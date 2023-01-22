@@ -40,4 +40,4 @@ class DishEmptyRequestBodyError(ApiError):
 
 
 class DishPriceValidationError(ApiError):
-    detail = Field('the price of the dish must be a floating point number')
+    detail = Field('The price of the dish must be a floating point number')
