@@ -140,6 +140,9 @@ async def delete_dish(
         },
         status.HTTP_400_BAD_REQUEST: {
             'model': DishEmptyRequestBodyError
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            'model': DishPriceValidationError
         }
     }
 )
@@ -151,7 +154,7 @@ async def update_dish(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[OutputDish, DishNotFoundError, DishEmptyRequestBodyError]:
+) -> Union[OutputDish, DishNotFoundError, DishEmptyRequestBodyError, DishPriceValidationError]:
     try:
         return await dish_service.update_dish(uow, UpdateDish(
             menu_id=str(menu_id),
@@ -165,3 +168,6 @@ async def update_dish(
     except DishNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return DishNotFoundError()
+    except ValidationError:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return DishPriceValidationError()
