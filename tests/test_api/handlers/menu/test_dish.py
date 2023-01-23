@@ -16,10 +16,10 @@ class TestDishHandlers:
         (
                 str(uuid.uuid4()),
                 str(uuid.uuid4()),
-                {
-                    'detail': 'submenu not found'
-                },
-                404
+                # {
+                [],  # 'detail': 'submenu not found'
+                # },
+                200  # 404
         )
     ])
     async def test_dishes_get(
@@ -305,14 +305,14 @@ class TestDishHandlers:
                 400
         ),
         (
-            '911577a1-fbf5-4931-b075-e7641c84121a',
-            {
-                'price': 'string'
-            },
-            {
-                'detail': 'The price of the dish must be a floating point number'
-            },
-            422
+                '911577a1-fbf5-4931-b075-e7641c84121a',
+                {
+                    'price': 'string'
+                },
+                {
+                    'detail': 'The price of the dish must be a floating point number'
+                },
+                422
         )
     ])
     async def test_patch_dish(

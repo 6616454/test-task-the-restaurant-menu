@@ -17,7 +17,8 @@ class GetDishes(DishUseCase):
         if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
             return await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
 
-        raise SubMenuNotExists
+        return []
+        # raise SubMenuNotExists
 
 
 class GetDish(DishUseCase):

@@ -36,12 +36,12 @@ async def get_dishes(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[list[OutputDish], SubMenuNotFoundError]:
-    try:
-        return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))
-    except SubMenuNotExists:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return SubMenuNotFoundError()
+) -> Union[list[OutputDish]]: # , SubMenuNotFoundError]
+    # try:
+    return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))
+    # except SubMenuNotExists:
+    #     response.status_code = status.HTTP_404_NOT_FOUND
+    #     return SubMenuNotFoundError()
 
 
 @router.get(
