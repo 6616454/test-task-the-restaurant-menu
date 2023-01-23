@@ -1,12 +1,18 @@
+# SQLAlchemy & Alembic
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
 DATABASE_TEST_URL=postgresql+asyncpg://postgres:postgres@test_db:5432/test_db
 
+# APP
 APP_PORT=8000
-APP_PORT_TEST=8001
 
+
+# DB
 POSTGRES_DB=postgres
-POSTGRES_DB2=test_db
 POSTGRES_PORT=5432
-POSTGRES_TEST_PORT=5433
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
+
+# TESTS
+POSTGRES_DB2=test_db
+POSTGRES_TEST_PORT=5433
+APP_PORT_TEST=8001
