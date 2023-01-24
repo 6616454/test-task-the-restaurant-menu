@@ -6,7 +6,7 @@ import pytest_asyncio
 from fastapi import FastAPI
 from sqlalchemy import insert, text, delete, select
 from sqlalchemy.orm import sessionmaker, close_all_sessions
-from starlette.testclient import TestClient
+from httpx import AsyncClient
 
 from src.api.di import setup_di
 from src.api.handlers import setup_routes
@@ -42,9 +42,9 @@ def event_loop() -> Generator:
     loop.close()
 
 
-@pytest.fixture(scope="function")
-def client() -> Generator[TestClient, Any, None]:
-    with TestClient(build_test_app()) as client:
+@pytest_asyncio.fixture(scope="function")
+async def client() -> Generator[AsyncClient, Any, None]:
+    async with AsyncClient(app=build_test_app(), base_url='http://test') as client:
         yield client
 
 
