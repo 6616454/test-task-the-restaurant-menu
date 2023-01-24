@@ -30,7 +30,7 @@ class TestSubMenuHandlers:
             create_menu_in_database
     ):
         await create_menu_in_database(**menu_data)
-        response = client.get(f'api/v1/menus/{menu_id}/submenus')
+        response = await client.get(f'api/v1/menus/{menu_id}/submenus')
 
         assert response.json() == expected_result
         assert response.status_code == status_code
@@ -46,7 +46,7 @@ class TestSubMenuHandlers:
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.get(f'api/v1/menus/{menu_data["menu_id"]}/submenus')
+        response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}/submenus')
 
         assert len(response.json()) == 1
         assert response.status_code == 200
@@ -65,7 +65,7 @@ class TestSubMenuHandlers:
         }
 
         await create_menu_in_database(**menu_data)
-        response = client.post(f'api/v1/menus/{menu_data["menu_id"]}/submenus', json=test_data)
+        response = await client.post(f'api/v1/menus/{menu_data["menu_id"]}/submenus', json=test_data)
         data = response.json()
 
         assert data['title'] == test_data['title']
@@ -165,7 +165,7 @@ class TestSubMenuHandlers:
             status_code,
     ):
         await create_menu_in_database(**menu_data)
-        response = client.post(f'api/v1/menus/{menu_id}/submenus', json=test_data)
+        response = await client.post(f'api/v1/menus/{menu_id}/submenus', json=test_data)
 
         assert response.json() == expected_result
         assert response.status_code == status_code
@@ -182,7 +182,7 @@ class TestSubMenuHandlers:
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
 
-        response = client.get(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}')
+        response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}')
         data = response.json()
 
         assert data['id'] == submenu_data['submenu_id']
@@ -193,7 +193,7 @@ class TestSubMenuHandlers:
 
     @pytest.mark.asyncio
     async def test_get_submenu_404(self, client):
-        response = client.get(f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}')
+        response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}')
 
         assert response.status_code == 404
         assert response.json() == {'detail': 'submenu not found'}
@@ -276,7 +276,7 @@ class TestSubMenuHandlers:
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.patch(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_id}', json=test_data)
+        response = await client.patch(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_id}', json=test_data)
         data = response.json()
 
         assert data == expected_result
@@ -300,7 +300,7 @@ class TestSubMenuHandlers:
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.delete(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}')
+        response = await client.delete(f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}')
 
         assert response.json() == {
             'status': True,
@@ -314,7 +314,7 @@ class TestSubMenuHandlers:
 
     @pytest.mark.asyncio
     async def test_delete_submenu_404(self, client):
-        response = client.get(f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}')
+        response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}')
 
         assert response.json() == {'detail': 'submenu not found'}
         assert response.status_code == 404

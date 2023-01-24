@@ -6,7 +6,7 @@ import pytest
 class TestMenuHandlers:
     @pytest.mark.asyncio
     async def test_menus_get(self, client):
-        response = client.get('/api/v1/menus')
+        response = await client.get('api/v1/menus/')
 
         assert response.json() == []
         assert response.status_code == 200
@@ -14,7 +14,7 @@ class TestMenuHandlers:
     @pytest.mark.asyncio
     async def test_menus_get_after_create(self, client, create_menu_in_database, menu_data):
         await create_menu_in_database(**menu_data)
-        response = client.get('api/v1/menus')
+        response = await client.get('api/v1/menus/')
 
         assert len(response.json()) == 1
         assert response.status_code == 200
@@ -25,7 +25,7 @@ class TestMenuHandlers:
             'title': 'test_title',
             'description': 'test_description'
         }
-        response = client.post('api/v1/menus', json=test_data)
+        response = await client.post(f'api/v1/menus/', json=test_data)
         data = response.json()
 
         assert response.status_code == 201
@@ -97,7 +97,7 @@ class TestMenuHandlers:
         )
     ])
     async def test_invalid_create_menu(self, client, data, expected_result, status_code):
-        response = client.post('api/v1/menus', json=data)
+        response = await client.post('api/v1/menus/', json=data)
 
         assert response.json() == expected_result
         assert response.status_code == status_code
@@ -105,7 +105,7 @@ class TestMenuHandlers:
     @pytest.mark.asyncio
     async def test_get_menu(self, client, create_menu_in_database, menu_data):
         await create_menu_in_database(**menu_data)
-        response = client.get(f'api/v1/menus/{menu_data["menu_id"]}')
+        response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}')
         data = response.json()
 
         assert data['id'] == menu_data['menu_id']
@@ -118,7 +118,7 @@ class TestMenuHandlers:
 
     @pytest.mark.asyncio
     async def test_get_menu_404(self, client):
-        response = client.get(f'api/v1/menus/{str(uuid.uuid4())}')
+        response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}')
 
         assert response.json() == {'detail': 'menu not found'}
         assert response.status_code == 404
@@ -200,7 +200,7 @@ class TestMenuHandlers:
             get_menu_from_database
     ):
         await create_menu_in_database(**menu_data)
-        response = client.patch(f'api/v1/menus/{menu_id}', json=test_data)
+        response = await client.patch(f'api/v1/menus/{menu_id}', json=test_data)
         data = response.json()
 
         assert data == expected_result
@@ -216,7 +216,7 @@ class TestMenuHandlers:
     async def test_delete_menu(self, client, menu_data, create_menu_in_database, get_menu_from_database):
         await create_menu_in_database(**menu_data)
 
-        response = client.delete(f'api/v1/menus/{menu_data["menu_id"]}')
+        response = await client.delete(f'api/v1/menus/{menu_data["menu_id"]}')
 
         assert response.json() == {
             'status': True,
@@ -230,7 +230,7 @@ class TestMenuHandlers:
 
     @pytest.mark.asyncio
     async def test_delete_menu_404(self, client):
-        response = client.get(f'api/v1/menus/{str(uuid.uuid4())}')
+        response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}')
 
         assert response.json() == {'detail': 'menu not found'}
         assert response.status_code == 404
@@ -258,14 +258,14 @@ class TestMenuHandlers:
 
         await create_dish_in_database(**dish_data)
 
-        first_response = client.get(f'api/v1/menus/{menu_data["menu_id"]}')
+        first_response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}')
         first_data = first_response.json()
 
         await delete_dish_from_database(dish_data['dish_id'])
         await delete_dish_from_database(temp)
         await delete_submenu_from_database(submenu_data['submenu_id'])
 
-        second_response = client.get(f'api/v1/menus/{menu_data["menu_id"]}')
+        second_response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}')
         second_data = second_response.json()
 
         assert first_response.status_code == 200

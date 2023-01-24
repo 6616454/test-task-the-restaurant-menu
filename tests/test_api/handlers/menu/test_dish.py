@@ -36,8 +36,8 @@ class TestDishHandlers:
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.get(
-            f'/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes'
+        response = await client.get(
+            f'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes'
         )
 
         assert response.json() == expected_result
@@ -57,7 +57,7 @@ class TestDishHandlers:
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
         await create_dish_in_database(**dish_data)
-        response = client.get(
+        response = await client.get(
             f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}/dishes'
         )
 
@@ -82,7 +82,7 @@ class TestDishHandlers:
 
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.post(
+        response = await client.post(
             f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}/dishes',
             json=test_data
         )
@@ -190,7 +190,7 @@ class TestDishHandlers:
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
-        response = client.post(
+        response = await client.post(
             f'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes',
             json=test_data
         )
@@ -213,7 +213,7 @@ class TestDishHandlers:
         await create_submenu_in_database(**submenu_data)
         await create_dish_in_database(**dish_data)
 
-        response = client.get(
+        response = await client.get(
             f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}/dishes/{dish_data["dish_id"]}'
         )
         data = response.json()
@@ -226,7 +226,7 @@ class TestDishHandlers:
 
     @pytest.mark.asyncio
     async def test_get_dish_404(self, client):
-        response = client.get(
+        response = await client.get(
             f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}/dishes/{str(uuid.uuid4())}'
         )
 
@@ -334,7 +334,7 @@ class TestDishHandlers:
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
         await create_dish_in_database(**dish_data)
-        response = client.patch(
+        response = await client.patch(
             f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}/dishes/{dish_id}',
             json=test_data
         )
@@ -365,7 +365,7 @@ class TestDishHandlers:
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
         await create_dish_in_database(**dish_data)
-        response = client.delete(
+        response = await client.delete(
             f'api/v1/menus/{menu_data["menu_id"]}/submenus/{submenu_data["submenu_id"]}/dishes/{dish_data["dish_id"]}'
         )
 
@@ -381,7 +381,7 @@ class TestDishHandlers:
 
     @pytest.mark.asyncio
     async def test_delete_dish_404(self, client):
-        response = client.get(
+        response = await client.get(
             f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}/dishes/{str(uuid.uuid4())}'
         )
 
