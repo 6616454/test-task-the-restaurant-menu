@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
 
 from src.api.di import setup_di
 from src.api.handlers import setup_routes
@@ -17,7 +18,8 @@ def build_app() -> FastAPI:
     pool = create_pool(database_url=settings.database_url, echo_mode=settings.echo_mode)
 
     app = FastAPI(
-        title=settings.title
+        title=settings.title,
+        default_response_class=ORJSONResponse
     )
 
     # setup application
