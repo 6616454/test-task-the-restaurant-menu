@@ -4,11 +4,11 @@ from src.api.handlers.responses.base import ApiError
 
 
 class MenuNotFoundError(ApiError):
-    detail = Field("menu not found", const=True)
+    detail = Field('menu not found', const=True)
 
 
 class MenuAlreadyExistsError(ApiError):
-    detail = Field(f'menu already exists', const=True)
+    detail = Field('menu already exists', const=True)
 
 
 class MenuEmptyRequestBodyError(ApiError):
@@ -16,11 +16,11 @@ class MenuEmptyRequestBodyError(ApiError):
 
 
 class SubMenuNotFoundError(ApiError):
-    detail = Field("submenu not found", const=True)
+    detail = Field('submenu not found', const=True)
 
 
 class SubMenuAlreadyExistsError(ApiError):
-    detail = Field(f'submenu already exists', const=True)
+    detail = Field('submenu already exists', const=True)
 
 
 class SubMenuEmptyRequestBodyError(ApiError):
@@ -28,11 +28,11 @@ class SubMenuEmptyRequestBodyError(ApiError):
 
 
 class DishNotFoundError(ApiError):
-    detail = Field("dish not found", const=True)
+    detail = Field('dish not found', const=True)
 
 
 class DishAlreadyExistsError(ApiError):
-    detail = Field(f'dish already exists', const=True)
+    detail = Field('dish already exists', const=True)
 
 
 class DishEmptyRequestBodyError(ApiError):

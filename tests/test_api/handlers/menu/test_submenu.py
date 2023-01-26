@@ -7,17 +7,17 @@ class TestSubMenuHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, expected_result, status_code', [
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                [],
-                200
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            [],
+            200
 
         ),
         (
-                str(uuid.uuid4()),
-                {
-                    'detail': 'menu not found'
-                },
-                404
+            str(uuid.uuid4()),
+            {
+                'detail': 'menu not found'
+            },
+            404
         )
     ])
     async def test_get_submenus(
@@ -80,78 +80,78 @@ class TestSubMenuHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, test_data, expected_result, status_code', [
         (
-                str(uuid.uuid4()),
-                {
-                    'title': 'title',
-                    'description': 'description'
-                },
-                {
-                    'detail': 'menu not found'
-                },
-                404
+            str(uuid.uuid4()),
+            {
+                'title': 'title',
+                'description': 'description'
+            },
+            {
+                'detail': 'menu not found'
+            },
+            404
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {
-                    'title': 'title'
-                },
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "description"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {
+                'title': 'title'
+            },
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'description'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {
-                    'description': 'description'
-                },
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "title"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {
+                'description': 'description'
+            },
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'title'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {},
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "title"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        },
-                        {
-                            "loc": [
-                                "body",
-                                "description"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {},
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'title'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    },
+                    {
+                        'loc': [
+                            'body',
+                            'description'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         )
     ])
     async def test_invalid_create_submenu(
@@ -201,63 +201,63 @@ class TestSubMenuHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('submenu_id, test_data, expected_result, status_code', [
         (
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'title': 'new_title',
-                    'description': 'new_description'
-                },
-                {
-                    'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                    'title': 'new_title',
-                    'description': 'new_description',
-                    'dishes_count': 0
-                },
-                200
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'title': 'new_title',
+                'description': 'new_description'
+            },
+            {
+                'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
+                'title': 'new_title',
+                'description': 'new_description',
+                'dishes_count': 0
+            },
+            200
         ),
         (
-                str(uuid.uuid4()),
-                {
-                    'title': 'new_title',
-                    'description': 'new_description'
-                },
-                {
-                    'detail': 'submenu not found'
-                },
-                404
+            str(uuid.uuid4()),
+            {
+                'title': 'new_title',
+                'description': 'new_description'
+            },
+            {
+                'detail': 'submenu not found'
+            },
+            404
         ),
         (
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {},
-                {
-                    'detail': 'submenu_data request body empty'
-                },
-                400
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {},
+            {
+                'detail': 'submenu_data request body empty'
+            },
+            400
         ),
         (
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'description': 'new_description2'
-                },
-                {
-                    'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                    'title': 'some_title',
-                    'description': 'new_description2',
-                    'dishes_count': 0
-                },
-                200
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'description': 'new_description2'
+            },
+            {
+                'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
+                'title': 'some_title',
+                'description': 'new_description2',
+                'dishes_count': 0
+            },
+            200
         ),
         (
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'title': 'new_title2'
-                },
-                {
-                    'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                    'title': 'new_title2',
-                    'description': 'some_description',
-                    'dishes_count': 0
-                },
-                200
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'title': 'new_title2'
+            },
+            {
+                'id': '5f740121-65d6-490b-984c-1cb28a4b43fa',
+                'title': 'new_title2',
+                'description': 'some_description',
+                'dishes_count': 0
+            },
+            200
         )
     ])
     async def test_patch_submenu(
@@ -318,4 +318,3 @@ class TestSubMenuHandlers:
 
         assert response.json() == {'detail': 'submenu not found'}
         assert response.status_code == 404
-

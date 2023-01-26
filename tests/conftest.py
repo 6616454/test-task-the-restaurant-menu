@@ -1,12 +1,13 @@
 import asyncio
-from typing import Generator, Any
+from collections.abc import AsyncGenerator, Generator
+from typing import Any
 
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
-from sqlalchemy import insert, text, delete, select
-from sqlalchemy.orm import sessionmaker, close_all_sessions
 from httpx import AsyncClient
+from sqlalchemy import delete, insert, select, text
+from sqlalchemy.orm import close_all_sessions, sessionmaker
 
 from src.api.di import setup_di
 from src.api.handlers import setup_routes
@@ -22,7 +23,8 @@ def build_test_app() -> FastAPI:
 
     settings = get_settings()
 
-    pool = create_pool(database_url=settings.database_test_url, echo_mode=False)
+    pool = create_pool(
+        database_url=settings.database_test_url, echo_mode=False)
 
     app = FastAPI(
         title=settings.title
@@ -42,19 +44,19 @@ def event_loop() -> Generator:
     loop.close()
 
 
-@pytest_asyncio.fixture(scope="function")
-async def client() -> Generator[AsyncClient, Any, None]:
+@pytest_asyncio.fixture(scope='function')
+async def client() -> AsyncGenerator[AsyncClient, Any, None]:
     async with AsyncClient(app=build_test_app(), base_url='http://test') as client:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope='session')
 async def db_session_test() -> sessionmaker:
     yield create_pool(get_settings().database_test_url, echo_mode=False)
     close_all_sessions()
 
 
-@pytest_asyncio.fixture(scope="function", autouse=True)
+@pytest_asyncio.fixture(scope='function', autouse=True)
 async def clean_tables(db_session_test):
     tables = ('menu', 'submenu', 'dish')
     async with db_session_test() as session:

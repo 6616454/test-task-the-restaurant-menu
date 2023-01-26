@@ -15,8 +15,8 @@ class CreateRequestDish(CreateRequestMenu):
 
 
 class UpdateRequestMenu(CreateRequestMenu):
-    title: str = None
-    description: str = None
+    title: str | None = None
+    description: str | None = None
 
 
 class UpdateRequestSubMenu(UpdateRequestMenu):
@@ -24,4 +24,4 @@ class UpdateRequestSubMenu(UpdateRequestMenu):
 
 
 class UpdateRequestDish(UpdateRequestMenu):
-    price: str = None
+    price: str | None = None

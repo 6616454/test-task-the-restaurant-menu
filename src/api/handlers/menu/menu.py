@@ -1,15 +1,20 @@
-from typing import Optional, Union
-
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 
-from src.api.di import uow_provider, menu_service_stub
+from src.api.di import menu_service_stub, uow_provider
 from src.api.handlers.requests.menu import CreateRequestMenu, UpdateRequestMenu
-from src.api.handlers.responses.exceptions import MenuNotFoundError, MenuAlreadyExistsError, \
-    MenuEmptyRequestBodyError
+from src.api.handlers.responses.exceptions import (
+    MenuAlreadyExistsError,
+    MenuEmptyRequestBodyError,
+    MenuNotFoundError,
+)
 from src.api.handlers.responses.menu import MenuDeleteResponse
-from src.domain.menu.exceptions.menu import MenuNotExists, MenuAlreadyExists, MenuDataEmpty
-from src.domain.menu.dto.menu import OutputMenu, UpdateMenu, CreateMenu
+from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
+from src.domain.menu.exceptions.menu import (
+    MenuAlreadyExists,
+    MenuDataEmpty,
+    MenuNotExists,
+)
 from src.domain.menu.usecases.menu import MenuService
 from src.infrastructure.db.holder import SQLAlchemyUoW
 
@@ -34,7 +39,7 @@ async def get_menu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
-) -> Union[OutputMenu, MenuNotFoundError]:
+) -> OutputMenu | MenuNotFoundError:
     try:
         return await menu_service.get_menu(uow, str(menu_id))
     except MenuNotExists:
@@ -46,7 +51,7 @@ async def get_menu(
 async def get_menus(
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
-) -> Optional[list[OutputMenu]]:
+) -> list[OutputMenu] | None:
     return await menu_service.get_menus(uow)
 
 
@@ -64,7 +69,7 @@ async def create_menu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
-) -> Union[OutputMenu, MenuAlreadyExistsError]:
+) -> OutputMenu | MenuAlreadyExistsError:
     try:
         return await menu_service.create_menu(uow, CreateMenu(**data.dict()))
     except MenuAlreadyExists:
@@ -114,7 +119,7 @@ async def update_menu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
-) -> Union[OutputMenu, MenuNotFoundError, MenuEmptyRequestBodyError]:
+) -> OutputMenu | MenuNotFoundError | MenuEmptyRequestBodyError:
     try:
         return await menu_service.update_menu(uow, UpdateMenu(
             menu_id=str(menu_id),

@@ -3,10 +3,14 @@ from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from src.domain.menu.exceptions.menu import MenuAlreadyExists, MenuNotExists, MenuDataEmpty
+from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
+from src.domain.menu.exceptions.menu import (
+    MenuAlreadyExists,
+    MenuDataEmpty,
+    MenuNotExists,
+)
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import MenuUseCase
-from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
 
@@ -43,7 +47,7 @@ class AddMenu(MenuUseCase):
 
 
 class DeleteMenu(MenuUseCase):
-    async def __call__(self, menu_id: str):
+    async def __call__(self, menu_id: str) -> MenuNotExists | None:
         menu_obj = await self.uow.menu_holder.menu_repo.get_by_id(menu_id)
         if menu_obj:
             await self.uow.menu_holder.menu_repo.delete(menu_obj)

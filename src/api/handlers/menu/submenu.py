@@ -1,17 +1,23 @@
-from typing import Union
-
-from fastapi import status, Response, Depends, APIRouter
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 
 from src.api.di import uow_provider
 from src.api.di.providers.services import submenu_service_stub
 from src.api.handlers.requests.menu import CreateRequestSubMenu, UpdateRequestSubMenu
-from src.api.handlers.responses.exceptions import SubMenuNotFoundError, SubMenuAlreadyExistsError, \
-    SubMenuEmptyRequestBodyError, MenuNotFoundError
+from src.api.handlers.responses.exceptions import (
+    MenuNotFoundError,
+    SubMenuAlreadyExistsError,
+    SubMenuEmptyRequestBodyError,
+    SubMenuNotFoundError,
+)
 from src.api.handlers.responses.menu import SubMenuDeleteResponse
+from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, UpdateSubMenu
 from src.domain.menu.exceptions.menu import MenuNotExists
-from src.domain.menu.exceptions.submenu import SubMenuNotExists, SubMenuAlreadyExists, SubMenuDataEmpty
-from src.domain.menu.dto.submenu import OutputSubMenu, CreateSubMenu, UpdateSubMenu
+from src.domain.menu.exceptions.submenu import (
+    SubMenuAlreadyExists,
+    SubMenuDataEmpty,
+    SubMenuNotExists,
+)
 from src.domain.menu.usecases.submenu import SubMenuService
 from src.infrastructure.db.holder import SQLAlchemyUoW
 
@@ -37,7 +43,7 @@ async def get_submenus(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
-) -> Union[list[OutputSubMenu], MenuNotFoundError]:
+) -> list[OutputSubMenu] | MenuNotFoundError:
     try:
         return await submenu_service.get_submenus(uow, str(menu_id))
     except MenuNotExists:
@@ -60,7 +66,7 @@ async def get_submenu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: SubMenuService = Depends(submenu_service_stub)
-) -> Union[OutputSubMenu, SubMenuNotFoundError]:
+) -> OutputSubMenu | SubMenuNotFoundError:
     try:
         return await menu_service.get_submenu(uow, str(menu_id), str(submenu_id))
     except SubMenuNotExists:
@@ -87,7 +93,7 @@ async def create_submenu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: SubMenuService = Depends(submenu_service_stub)
-) -> Union[OutputSubMenu, SubMenuAlreadyExistsError, MenuNotFoundError]:
+) -> OutputSubMenu | SubMenuAlreadyExistsError | MenuNotFoundError:
     try:
         return await menu_service.create_submenu(uow, CreateSubMenu(menu_id=str(menu_id), **data.dict()))
     except SubMenuAlreadyExists:
@@ -142,7 +148,7 @@ async def update_submenu(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
-) -> Union[OutputSubMenu, SubMenuNotFoundError, SubMenuEmptyRequestBodyError]:
+) -> OutputSubMenu | SubMenuNotFoundError | SubMenuEmptyRequestBodyError:
     try:
         return await submenu_service.update_submenu(uow, UpdateSubMenu(
             menu_id=str(menu_id),

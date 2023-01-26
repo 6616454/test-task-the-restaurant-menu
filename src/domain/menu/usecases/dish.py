@@ -2,11 +2,15 @@ import logging
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from src.domain.menu.exceptions.dish import DishNotExists, DishAlreadyExists, DishDataEmpty
+from src.domain.menu.dto.dish import CreateDish, UpdateDish
+from src.domain.menu.exceptions.dish import (
+    DishAlreadyExists,
+    DishDataEmpty,
+    DishNotExists,
+)
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import DishUseCase
-from src.domain.menu.dto.dish import CreateDish, UpdateDish
 from src.infrastructure.db.models.dish import Dish
 
 logger = logging.getLogger('main_logger')

@@ -10,6 +10,9 @@ def setup_di(app: FastAPI, pool: sessionmaker) -> None:
     db_provider = DBProvider(pool)
 
     app.dependency_overrides[uow_provider] = db_provider.provide_db
-    app.dependency_overrides[menu_service_stub] = lambda: provide_menu_service()
-    app.dependency_overrides[submenu_service_stub] = lambda: provide_submenu_service()
-    app.dependency_overrides[dish_service_stub] = lambda: provide_dish_service()
+    app.dependency_overrides[menu_service_stub] = lambda: provide_menu_service(
+    )
+    app.dependency_overrides[submenu_service_stub] = lambda: provide_submenu_service(
+    )
+    app.dependency_overrides[dish_service_stub] = lambda: provide_dish_service(
+    )

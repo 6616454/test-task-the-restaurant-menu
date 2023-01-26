@@ -15,7 +15,8 @@ def build_app() -> FastAPI:
 
     settings = get_settings()
 
-    pool = create_pool(database_url=settings.database_url, echo_mode=settings.echo_mode)
+    pool = create_pool(database_url=settings.database_url,
+                       echo_mode=settings.echo_mode)
 
     app = FastAPI(
         title=settings.title,

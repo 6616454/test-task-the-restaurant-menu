@@ -1,4 +1,4 @@
-from pydantic import validator, UUID4
+from pydantic import UUID4, validator
 
 from src.domain.common.dto.base import DTO
 from src.domain.menu.dto.menu import BaseMenu
@@ -12,7 +12,7 @@ class BaseDish(BaseMenu):
         if v is None:
             return
 
-        return '{:.2f}'.format(round(float(v), 2))
+        return f'{round(float(v), 2):.2f}'
 
 
 class OutputDish(DTO):

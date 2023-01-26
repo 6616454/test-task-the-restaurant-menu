@@ -25,7 +25,7 @@ class TestMenuHandlers:
             'title': 'test_title',
             'description': 'test_description'
         }
-        response = await client.post(f'api/v1/menus/', json=test_data)
+        response = await client.post('api/v1/menus/', json=test_data)
         data = response.json()
 
         assert response.status_code == 201
@@ -42,58 +42,58 @@ class TestMenuHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('data, expected_result, status_code', [
         (
-                {}, {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "title"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        },
-                        {
-                            "loc": [
-                                "body",
-                                "description"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            {}, {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'title'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    },
+                    {
+                        'loc': [
+                            'body',
+                            'description'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         ),
         (
-                {'title': 'title'},
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "description"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422,
+            {'title': 'title'},
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'description'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422,
         ),
         (
-                {'description': 'desc'}, {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "title"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            {'description': 'desc'}, {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'title'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         )
     ])
     async def test_invalid_create_menu(self, client, data, expected_result, status_code):
@@ -126,66 +126,66 @@ class TestMenuHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, test_data, expected_result, status_code', [
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {
-                    'title': 'new_title',
-                    'description': 'new_description'
-                },
-                {
-                    'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                    'title': 'new_title',
-                    'description': 'new_description',
-                    'submenus_count': 0,
-                    'dishes_count': 0
-                },
-                200
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {
+                'title': 'new_title',
+                'description': 'new_description'
+            },
+            {
+                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
+                'title': 'new_title',
+                'description': 'new_description',
+                'submenus_count': 0,
+                'dishes_count': 0
+            },
+            200
         ),
         (
-                str(uuid.uuid4()),
-                {
-                    'title': 'new_title',
-                    'description': 'new_description'
-                },
-                {
-                    'detail': 'menu not found'
-                },
-                404
+            str(uuid.uuid4()),
+            {
+                'title': 'new_title',
+                'description': 'new_description'
+            },
+            {
+                'detail': 'menu not found'
+            },
+            404
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {},
-                {
-                    'detail': 'menu_data request body empty'
-                },
-                400
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {},
+            {
+                'detail': 'menu_data request body empty'
+            },
+            400
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {
-                    'description': 'new_description2'
-                },
-                {
-                    'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                    'title': 'some_title',
-                    'description': 'new_description2',
-                    'submenus_count': 0,
-                    'dishes_count': 0
-                },
-                200
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {
+                'description': 'new_description2'
+            },
+            {
+                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
+                'title': 'some_title',
+                'description': 'new_description2',
+                'submenus_count': 0,
+                'dishes_count': 0
+            },
+            200
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                {
-                    'title': 'new_title2'
-                },
-                {
-                    'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                    'title': 'new_title2',
-                    'description': 'some_description',
-                    'submenus_count': 0,
-                    'dishes_count': 0
-                },
-                200
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            {
+                'title': 'new_title2'
+            },
+            {
+                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
+                'title': 'new_title2',
+                'description': 'some_description',
+                'submenus_count': 0,
+                'dishes_count': 0
+            },
+            200
         )
     ])
     async def test_patch_menu(

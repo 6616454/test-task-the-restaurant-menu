@@ -6,7 +6,7 @@ class MenuRepoMock:
         'menu_1': {'title': 'title', 'description': 'description'}
     }
 
-    new_value: dict[str] = None
+    new_value: dict[str, str] | None = None
 
     async def get_by_id(self, menu_id: str):
         data = self.test_data.get(menu_id)

@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -32,7 +32,8 @@ class SubMenuRepository(BaseRepository[SubMenu]):
         return (await self.session.execute(query)).scalars().all()
 
     async def get_by_menu_and_id(self, menu_id: str, submenu_id: str, load: bool) -> SubMenu:
-        query = select(self.model).where(and_(self.model.menu_id == menu_id), self.model.id == submenu_id)
+        query = select(self.model).where(
+            and_(self.model.menu_id == menu_id), self.model.id == submenu_id)
         if load:
             query = query.options(joinedload(self.model.dishes))
 

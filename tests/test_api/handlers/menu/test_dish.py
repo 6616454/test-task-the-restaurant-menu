@@ -8,18 +8,18 @@ class TestDishHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, submenu_id, expected_result, status_code', [
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                [],
-                200
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            [],
+            200
         ),
         (
-                str(uuid.uuid4()),
-                str(uuid.uuid4()),
-                # {
-                [],  # 'detail': 'submenu not found'
-                # },
-                200  # 404
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            # {
+            [],  # 'detail': 'submenu not found'
+            # },
+            200  # 404
         )
     ])
     async def test_dishes_get(
@@ -100,79 +100,79 @@ class TestDishHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, submenu_id, test_data, expected_result, status_code', [
         (
-                str(uuid.uuid4()),
-                str(uuid.uuid4()),
-                {
-                    'title': 'title',
-                    'description': 'description',
-                    'price': '12.49'
-                },
-                {
-                    'detail': 'submenu not found'
-                },
-                404
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            {
+                'title': 'title',
+                'description': 'description',
+                'price': '12.49'
+            },
+            {
+                'detail': 'submenu not found'
+            },
+            404
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'price': '12.50'
-                },
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "title"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        },
-                        {
-                            "loc": [
-                                "body",
-                                "description"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        }
-                    ]
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'price': '12.50'
+            },
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'title'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    },
+                    {
+                        'loc': [
+                            'body',
+                            'description'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    }
+                ]
+            },
+            422
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'title': 'title',
-                    'description': 'description'
-                },
-                {
-                    "detail": [
-                        {
-                            "loc": [
-                                "body",
-                                "price"
-                            ],
-                            "msg": "field required",
-                            "type": "value_error.missing"
-                        },
-                    ]
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'title': 'title',
+                'description': 'description'
+            },
+            {
+                'detail': [
+                    {
+                        'loc': [
+                            'body',
+                            'price'
+                        ],
+                        'msg': 'field required',
+                        'type': 'value_error.missing'
+                    },
+                ]
+            },
+            422
         ),
         (
-                'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                '5f740121-65d6-490b-984c-1cb28a4b43fa',
-                {
-                    'title': 'title',
-                    'description': 'description',
-                    'price': 'string'
-                },
-                {
-                    'detail': 'The price of the dish must be a floating point number'
-                },
-                422
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            '5f740121-65d6-490b-984c-1cb28a4b43fa',
+            {
+                'title': 'title',
+                'description': 'description',
+                'price': 'string'
+            },
+            {
+                'detail': 'The price of the dish must be a floating point number'
+            },
+            422
         ),
     ])
     async def test_invalid_create_dish(
@@ -236,83 +236,83 @@ class TestDishHandlers:
     @pytest.mark.asyncio
     @pytest.mark.parametrize('dish_id, test_data, expected_result, status_code', [
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {
-                    'title': 'new_title',
-                    'description': 'new_description',
-                    'price': '13.50'
-                },
-                {
-                    'id': '911577a1-fbf5-4931-b075-e7641c84121a',
-                    'title': 'new_title',
-                    'description': 'new_description',
-                    'price': '13.50'
-                },
-                200
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {
+                'title': 'new_title',
+                'description': 'new_description',
+                'price': '13.50'
+            },
+            {
+                'id': '911577a1-fbf5-4931-b075-e7641c84121a',
+                'title': 'new_title',
+                'description': 'new_description',
+                'price': '13.50'
+            },
+            200
         ),
         (
-                str(uuid.uuid4()),
-                {
-                    'title': 'new_title',
-                    'description': 'new_description'
-                },
-                {
-                    'detail': 'dish not found'
-                },
-                404
+            str(uuid.uuid4()),
+            {
+                'title': 'new_title',
+                'description': 'new_description'
+            },
+            {
+                'detail': 'dish not found'
+            },
+            404
         ),
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {},
-                {
-                    'detail': 'dish_data request body empty'
-                },
-                400
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {},
+            {
+                'detail': 'dish_data request body empty'
+            },
+            400
         ),
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {
-                    'description': 'new_description2',
-                    'price': '13.50'
-                },
-                {
-                    'id': '911577a1-fbf5-4931-b075-e7641c84121a',
-                    'title': 'some_title',
-                    'description': 'new_description2',
-                    'price': '13.50'
-                },
-                200
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {
+                'description': 'new_description2',
+                'price': '13.50'
+            },
+            {
+                'id': '911577a1-fbf5-4931-b075-e7641c84121a',
+                'title': 'some_title',
+                'description': 'new_description2',
+                'price': '13.50'
+            },
+            200
         ),
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {
-                    'title': 'new_title2'
-                },
-                {
-                    'id': '911577a1-fbf5-4931-b075-e7641c84121a',
-                    'title': 'new_title2',
-                    'description': 'some_description',
-                    'price': '14.50'
-                },
-                200
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {
+                'title': 'new_title2'
+            },
+            {
+                'id': '911577a1-fbf5-4931-b075-e7641c84121a',
+                'title': 'new_title2',
+                'description': 'some_description',
+                'price': '14.50'
+            },
+            200
         ),
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {},
-                {
-                    'detail': 'dish_data request body empty'
-                },
-                400
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {},
+            {
+                'detail': 'dish_data request body empty'
+            },
+            400
         ),
         (
-                '911577a1-fbf5-4931-b075-e7641c84121a',
-                {
-                    'price': 'string'
-                },
-                {
-                    'detail': 'The price of the dish must be a floating point number'
-                },
-                422
+            '911577a1-fbf5-4931-b075-e7641c84121a',
+            {
+                'price': 'string'
+            },
+            {
+                'detail': 'The price of the dish must be a floating point number'
+            },
+            422
         )
     ])
     async def test_patch_dish(

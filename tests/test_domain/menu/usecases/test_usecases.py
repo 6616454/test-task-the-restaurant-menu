@@ -2,7 +2,13 @@ import pytest
 
 from src.domain.menu.dto.menu import CreateMenu
 from src.domain.menu.exceptions.menu import MenuNotExists
-from src.domain.menu.usecases.menu import GetMenu, GetMenus, AddMenu, DeleteMenu, PatchMenu
+from src.domain.menu.usecases.menu import (
+    AddMenu,
+    DeleteMenu,
+    GetMenu,
+    GetMenus,
+    PatchMenu,
+)
 from tests.mocks import UoWMock
 
 
@@ -25,7 +31,8 @@ class TestMenuUseCases:
     async def test_get_all_usecase(self):
         menus = await GetMenus(self.uow_mock)()
 
-        assert menus == [self.uow_mock.menu_holder.menu_repo.test_data['menu_1']]
+        assert menus == [
+            self.uow_mock.menu_holder.menu_repo.test_data['menu_1']]
         assert isinstance(menus, list) is True
 
     @pytest.mark.asyncio
@@ -54,4 +61,3 @@ class TestMenuUseCases:
         test_data = {'title': 't', 'description': 'd'}
         await PatchMenu(self.uow_mock)('menu_1', test_data)
         assert self.uow_mock.menu_holder.menu_repo.test_data['menu_1'] == test_data
-

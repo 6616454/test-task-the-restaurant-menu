@@ -1,16 +1,23 @@
-from typing import Union, Optional
-
-from fastapi import Depends, Response, status, APIRouter
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4, ValidationError
 
-from src.api.di import uow_provider, dish_service_stub
+from src.api.di import dish_service_stub, uow_provider
 from src.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
-from src.api.handlers.responses.exceptions import DishNotFoundError, DishAlreadyExistsError, SubMenuNotFoundError, \
-    DishEmptyRequestBodyError, DishPriceValidationError
+from src.api.handlers.responses.exceptions import (
+    DishAlreadyExistsError,
+    DishEmptyRequestBodyError,
+    DishNotFoundError,
+    DishPriceValidationError,
+    SubMenuNotFoundError,
+)
 from src.api.handlers.responses.menu import DishDeleteResponse
-from src.domain.menu.exceptions.dish import DishNotExists, DishAlreadyExists, DishDataEmpty
-from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.dto.dish import CreateDish, OutputDish, UpdateDish
+from src.domain.menu.exceptions.dish import (
+    DishAlreadyExists,
+    DishDataEmpty,
+    DishNotExists,
+)
+from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.usecases.dish import DishService
 from src.infrastructure.db.holder import SQLAlchemyUoW
 
@@ -33,10 +40,9 @@ router = APIRouter(
 async def get_dishes(
         menu_id: UUID4,
         submenu_id: UUID4,
-        response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[list[OutputDish]]: # , SubMenuNotFoundError]
+) -> list[OutputDish]:  # , SubMenuNotFoundError]
     # try:
     return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))
     # except SubMenuNotExists:
@@ -59,7 +65,7 @@ async def get_dish(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[OutputDish, DishNotFoundError]:
+) -> OutputDish | DishNotFoundError:
     try:
         return await dish_service.get_dish(uow, str(submenu_id), str(dish_id))
     except DishNotExists:
@@ -89,7 +95,7 @@ async def create_dish(
         data: CreateRequestDish,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[OutputDish, SubMenuNotFoundError, DishAlreadyExistsError, DishPriceValidationError]:
+) -> OutputDish | SubMenuNotFoundError | DishAlreadyExistsError | DishPriceValidationError:
     try:
         return await dish_service.create_dish(uow, CreateDish(
             menu_id=str(menu_id), submenu_id=str(submenu_id), **data.dict()
@@ -154,7 +160,7 @@ async def update_dish(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         dish_service: DishService = Depends(dish_service_stub)
-) -> Union[OutputDish, DishNotFoundError, DishEmptyRequestBodyError, DishPriceValidationError]:
+) -> OutputDish | DishNotFoundError | DishEmptyRequestBodyError | DishPriceValidationError:
     try:
         return await dish_service.update_dish(uow, UpdateDish(
             menu_id=str(menu_id),

@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type
+from typing import Generic, TypeVar
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +10,7 @@ Model = TypeVar('Model', bound=Base)
 
 class BaseRepository(Generic[Model]):
 
-    def __init__(self, model: Type[Model], session: AsyncSession):
+    def __init__(self, model: type[Model], session: AsyncSession):
         self.model = model
         self.session = session
 
