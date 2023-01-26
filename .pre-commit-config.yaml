@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: trailing-whitespace # удаление лишних пробелов
+      - id: double-quote-string-fixer # замена "" на ''
+      - id: check-yaml # проверка yaml файлов
+
+# Сортировка импортов
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        exclude: __init__.py
+        args: [ --profile, black, --filter-files ]
+
+
+# Форматирование кода под PEP8
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.1
+    hooks:
+      - id: autopep8
+
+# Обновление синтаксиса Python кода в соответствии с последними версиями
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+    -   id: pyupgrade
+        args: [--py310-plus]
+
+# Линтер flake-8, проверка ошибок стиля, нарушающих PEP8
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        exclude: __init__.py
+        args: [ "--ignore=E501,F821" ]
