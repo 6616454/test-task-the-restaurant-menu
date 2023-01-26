@@ -26,7 +26,7 @@ make up
 ```
 make up-tests
 ```
-5.For run lint-instruments use the "make lint" command
+5.For run lint-instruments(pre-commit hook scripts) use the "make lint" command
 ```
 make lint
 ```
