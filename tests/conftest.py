@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
 from httpx import AsyncClient
 from sqlalchemy import delete, insert, select, text
 from sqlalchemy.orm import close_all_sessions, sessionmaker
@@ -27,7 +28,8 @@ def build_test_app() -> FastAPI:
         database_url=settings.database_test_url, echo_mode=False)
 
     app = FastAPI(
-        title=settings.title
+        title=settings.title,
+        default_response_class=ORJSONResponse
     )
 
     # setup test application
