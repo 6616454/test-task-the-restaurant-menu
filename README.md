@@ -26,8 +26,12 @@ make up
 ```
 make up-tests
 ```
+5.For run lint-instruments use the "make lint" command
+```
+make lint
+```
 
-5.The application is available at
+6.The application is available at
 
 ```
 127.0.0.1:8000/docs

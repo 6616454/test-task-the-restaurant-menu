@@ -10,4 +10,7 @@ up-tests:
 down-tests:
 	docker compose -f docker-compose-test.yaml down -v && docker network prune --force
 
+lint:
+	pre-commit run --all-files
+
 
