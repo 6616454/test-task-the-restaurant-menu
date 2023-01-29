@@ -26,7 +26,7 @@ services:
     ports:
       - "${REDIS_TEST_PORT}:6379"
     networks:
-      custom:
+      custom_test:
 
   app-test:
     build:
@@ -42,7 +42,9 @@ services:
       - TEST=1
     depends_on:
       test_db:
-        condition: service_completed_successfully
+        condition: service_healthy
+      test_cache:
+        condition: service_started
     networks:
       custom_test:
 

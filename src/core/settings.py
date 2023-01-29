@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # Test settings
     database_test_url: str
 
-    redis_test_port: int
+    redis_test_cache: str
     redis_test_db: int = 2
 
     class Config:
