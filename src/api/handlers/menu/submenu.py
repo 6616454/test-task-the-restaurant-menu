@@ -43,7 +43,7 @@ async def get_submenus(
         response: Response,
         uow: SQLAlchemyUoW = Depends(uow_provider),
         submenu_service: SubMenuService = Depends(submenu_service_stub)
-) -> list[OutputSubMenu] | MenuNotFoundError:
+) -> list[OutputSubMenu] | MenuNotFoundError | None:
     try:
         return await submenu_service.get_submenus(uow, str(menu_id))
     except MenuNotExists:
