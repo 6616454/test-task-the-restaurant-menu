@@ -7,6 +7,7 @@ import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from httpx import AsyncClient
+from redis.asyncio.client import Redis
 from sqlalchemy import delete, insert, select, text
 from sqlalchemy.orm import close_all_sessions, sessionmaker
 
@@ -34,8 +35,8 @@ def build_test_app() -> FastAPI:
 
     # setup test application
     setup_di(app=app, pool=pool, redis=create_redis(
-        settings.redis_host,
-        settings.redis_test_port,
+        settings.redis_test_cache,
+        settings.redis_port,
         settings.redis_test_db
     ))
     setup_routes(router=app.router)
@@ -62,6 +63,13 @@ async def db_session_test() -> sessionmaker:
     close_all_sessions()
 
 
+@pytest_asyncio.fixture(scope='session')
+async def get_cache() -> Redis:
+    redis_client = create_redis('test_cache', 6379, 2)
+    yield redis_client
+    await redis_client.close()
+
+
 @pytest_asyncio.fixture(scope='function', autouse=True)
 async def clean_tables(db_session_test):
     tables = ('menu', 'submenu', 'dish')
@@ -70,6 +78,12 @@ async def clean_tables(db_session_test):
             statement = text(f'''TRUNCATE TABLE {table} CASCADE;''')
             await session.execute(statement)
             await session.commit()
+
+
+@pytest_asyncio.fixture(scope='function', autouse=True)
+async def clean_cache(get_cache):
+    async for key in get_cache.scan_iter():
+        await get_cache.delete(key)
 
 
 @pytest_asyncio.fixture(scope='function')

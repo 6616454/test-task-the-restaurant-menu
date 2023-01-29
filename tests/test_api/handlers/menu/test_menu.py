@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import pytest
@@ -20,7 +21,7 @@ class TestMenuHandlers:
         assert response.status_code == 200
 
     @pytest.mark.asyncio
-    async def test_create_menu(self, client, get_menu_from_database):
+    async def test_create_menu(self, client, get_menu_from_database, get_cache):
         test_data = {
             'title': 'test_title',
             'description': 'test_description'
@@ -38,6 +39,13 @@ class TestMenuHandlers:
 
         assert data['title'] == menu_from_db.title
         assert data['description'] == menu_from_db.description
+
+        menu_from_cache = json.loads(await get_cache.get(data['id']))
+        print(menu_from_cache)
+        assert data['title'] == menu_from_cache['title']
+        assert data['description'] == menu_from_cache['description']
+        assert menu_from_cache['submenus_count'] == 0
+        assert menu_from_cache['dishes_count'] == 0
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize('data, expected_result, status_code', [
@@ -141,15 +149,18 @@ class TestMenuHandlers:
             200
         ),
         (
-            str(uuid.uuid4()),
+            'b61ec7b4-5b25-41de-9d41-f00331b04885',
             {
                 'title': 'new_title',
-                'description': 'new_description'
             },
             {
-                'detail': 'menu not found'
+                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
+                'title': 'new_title',
+                'description': 'some_description',
+                'submenus_count': 0,
+                'dishes_count': 0
             },
-            404
+            200
         ),
         (
             'b61ec7b4-5b25-41de-9d41-f00331b04885',
@@ -160,32 +171,15 @@ class TestMenuHandlers:
             400
         ),
         (
-            'b61ec7b4-5b25-41de-9d41-f00331b04885',
+            str(uuid.uuid4()),
             {
-                'description': 'new_description2'
+                'title': 'title2',
+                'description': 'desc2'
             },
             {
-                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                'title': 'some_title',
-                'description': 'new_description2',
-                'submenus_count': 0,
-                'dishes_count': 0
+                'detail': 'menu not found'
             },
-            200
-        ),
-        (
-            'b61ec7b4-5b25-41de-9d41-f00331b04885',
-            {
-                'title': 'new_title2'
-            },
-            {
-                'id': 'b61ec7b4-5b25-41de-9d41-f00331b04885',
-                'title': 'new_title2',
-                'description': 'some_description',
-                'submenus_count': 0,
-                'dishes_count': 0
-            },
-            200
+            404
         )
     ])
     async def test_patch_menu(
@@ -197,7 +191,8 @@ class TestMenuHandlers:
             status_code,
             menu_data,
             create_menu_in_database,
-            get_menu_from_database
+            get_menu_from_database,
+            get_cache
     ):
         await create_menu_in_database(**menu_data)
         response = await client.patch(f'api/v1/menus/{menu_id}', json=test_data)
@@ -212,11 +207,16 @@ class TestMenuHandlers:
             assert data['title'] == menu_from_db.title
             assert data['description'] == menu_from_db.description
 
+            menu_from_cache = json.loads(await get_cache.get(data['id']))
+
+            assert menu_from_cache['title'] == data['title']
+            assert menu_from_cache['description'] == data['description']
+
     @pytest.mark.asyncio
-    async def test_delete_menu(self, client, menu_data, create_menu_in_database, get_menu_from_database):
+    async def test_delete_menu(self, client, menu_data, create_menu_in_database, get_menu_from_database, get_cache):
         await create_menu_in_database(**menu_data)
 
-        response = await client.delete(f'api/v1/menus/{menu_data["menu_id"]}')
+        response = await client.delete(f'api/v1/menus/{menu_data.get("menu_id")}')
 
         assert response.json() == {
             'status': True,
@@ -227,6 +227,10 @@ class TestMenuHandlers:
         menu_from_db = await get_menu_from_database(menu_data['menu_id'])
 
         assert menu_from_db is None
+
+        menu_from_cache = await get_cache.get(menu_data['menu_id'])
+
+        assert menu_from_cache is None
 
     @pytest.mark.asyncio
     async def test_delete_menu_404(self, client):
