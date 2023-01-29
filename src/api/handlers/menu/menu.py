@@ -16,7 +16,7 @@ from src.domain.menu.exceptions.menu import (
     MenuNotExists,
 )
 from src.domain.menu.usecases.menu import MenuService
-from src.infrastructure.db.holder import SQLAlchemyUoW
+from src.infrastructure.db.uow import SQLAlchemyUoW
 
 router = APIRouter(
     prefix='/api/v1/menus',

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 
-from src.infrastructure.db.holder import SQLAlchemyUoW
+from src.infrastructure.db.uow import SQLAlchemyUoW
 
 
 def uow_provider() -> None:
