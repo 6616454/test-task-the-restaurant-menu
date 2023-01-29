@@ -1,5 +1,6 @@
 import logging
 
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -15,3 +16,8 @@ def create_pool(database_url: str, echo_mode: bool) -> sessionmaker:
     pool = sessionmaker(bind=engine, class_=AsyncSession,
                         expire_on_commit=False, autoflush=False)
     return pool
+
+
+def create_redis(redis_host: str, redis_port: int, redis_db: int) -> Redis:
+    logger.info('Creating Redis...')
+    return Redis(host=redis_host, port=redis_port, db=redis_db)

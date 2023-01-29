@@ -13,7 +13,7 @@ from sqlalchemy.orm import close_all_sessions, sessionmaker
 from src.api.di import setup_di
 from src.api.handlers import setup_routes
 from src.core.settings import get_settings
-from src.infrastructure.db.base import create_pool
+from src.infrastructure.db.base import create_pool, create_redis
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
@@ -33,7 +33,11 @@ def build_test_app() -> FastAPI:
     )
 
     # setup test application
-    setup_di(app=app, pool=pool)
+    setup_di(app=app, pool=pool, redis=create_redis(
+        settings.redis_host,
+        settings.redis_test_port,
+        settings.redis_test_db
+    ))
     setup_routes(router=app.router)
 
     return app

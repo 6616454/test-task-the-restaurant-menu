@@ -1,5 +1,3 @@
-from pydantic import UUID4
-
 from src.domain.common.dto.base import DTO
 
 
@@ -11,7 +9,7 @@ class BaseMenu(DTO):
 class OutputMenu(DTO):
     # Продублировал отдельно, чтобы подогнать под тесты
 
-    id: UUID4
+    id: str
     title: str
     description: str
     submenus_count: int = 0

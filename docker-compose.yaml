@@ -16,6 +16,18 @@ services:
     networks:
       custom:
 
+  cache:
+    image: redis:latest
+    restart: on-failure
+    env_file:
+      - .env
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      custom:
+
   app:
     build:
       context: .
@@ -30,9 +42,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_started
     networks:
       custom:
 
 networks:
   custom:
     driver: bridge
+
+volumes:
+  redis_data:

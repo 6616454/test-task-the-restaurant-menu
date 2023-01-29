@@ -1,5 +1,5 @@
+import json
 import logging
-from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -17,17 +17,54 @@ from src.infrastructure.db.models.submenu import SubMenu
 logger = logging.getLogger('main_logger')
 
 
+async def get_len(sub_menus: list[SubMenu], dishes: bool = False):
+    if dishes:
+        counter = 0
+
+        for sub_menu in sub_menus:
+            for _ in sub_menu.dishes:
+                counter += 1
+
+        return counter
+
+    return len(sub_menus)
+
+
 class GetMenu(MenuUseCase):
-    async def __call__(self, menu_id: str, load: bool) -> Menu:
+    async def __call__(self, menu_id: str, load: bool) -> OutputMenu:
+        cache = await self.uow.redis_repo.get(menu_id)
+        if cache:
+            return json.loads(cache)
+
         menu = await self.uow.menu_holder.menu_repo.get_by_id_all(menu_id, load)
         if menu:
-            return menu
-        raise MenuNotExists
+            result_menu = menu.to_dto(await get_len(menu.submenus), await get_len(menu.submenus, dishes=True)).dict()
+            await self.uow.redis_repo.put(menu_id, json.dumps(
+                result_menu
+            ))
+            return result_menu
 
 
 class GetMenus(MenuUseCase):
-    async def __call__(self) -> list[Menu]:
-        return await self.uow.menu_holder.menu_repo.get_all()
+    async def __call__(self) -> list[OutputMenu]:
+        cache = await self.uow.redis_repo.get('menus')
+        if cache:
+            return json.loads(cache)
+
+        menus = await self.uow.menu_holder.menu_repo.get_all()
+        if menus:
+            output_menus = [
+                menu.to_dto(await get_len(menu.submenus), await get_len(menu.submenus, dishes=True)).dict()
+                for menu in menus
+            ]
+
+            await self.uow.redis_repo.put('menus', json.dumps(
+                output_menus
+            ))
+
+            return output_menus
+
+        return menus
 
 
 class AddMenu(MenuUseCase):
@@ -41,6 +78,9 @@ class AddMenu(MenuUseCase):
         await self.uow.commit()
         await self.uow.menu_holder.menu_repo.refresh(menu)
 
+        await self.uow.redis_repo.put(str(menu.id), json.dumps(menu.to_dto().dict()))
+        await self.uow.redis_repo.delete('menus')
+
         logger.info('New menu - %s', data.title)
 
         return menu
@@ -48,15 +88,16 @@ class AddMenu(MenuUseCase):
 
 class DeleteMenu(MenuUseCase):
     async def __call__(self, menu_id: str) -> MenuNotExists | None:
-        menu_obj = await self.uow.menu_holder.menu_repo.get_by_id(menu_id)
+        menu_obj = json.loads(await self.uow.redis_repo.get(menu_id))
         if menu_obj:
-            await self.uow.menu_holder.menu_repo.delete(menu_obj)
+            await self.uow.menu_holder.menu_repo.delete_by_id(menu_obj['id'])
             await self.uow.commit()
 
-            logger.info('Menu was deleted - %s', menu_obj.title)
-            return
+            await self.uow.redis_repo.delete(menu_obj['id'])
+            await self.uow.redis_repo.delete('menus')
 
-        raise MenuNotExists
+            logger.info('Menu was deleted - %s', menu_obj['title'])
+            return menu_obj
 
 
 class PatchMenu(MenuUseCase):
@@ -64,63 +105,47 @@ class PatchMenu(MenuUseCase):
         await self.uow.menu_holder.menu_repo.update_obj(menu_id, **data)
         await self.uow.commit()
 
+        await self.uow.redis_repo.delete(menu_id)
+        await self.uow.redis_repo.delete('menus')
+
 
 class MenuService:
     """Represents business logic for Menu entity."""
 
     @staticmethod
-    async def _get_len(sub_menus: list[SubMenu], dishes: bool = False):
-        if dishes:
-            counter = 0
-
-            for sub_menu in sub_menus:
-                for _ in sub_menu.dishes:
-                    counter += 1
-
-            return counter
-
-        return len(sub_menus)
-
-    @staticmethod
-    async def delete_menu(uow: IMenuUoW, menu_id: UUID) -> None:
-        return await DeleteMenu(uow)(menu_id)
-
-    async def _get_ready_info(self, obj: Menu) -> OutputMenu:
-        return OutputMenu(
-            id=obj.id,
-            title=obj.title,
-            description=obj.description,
-            submenus_count=await self._get_len(obj.submenus),
-            dishes_count=await self._get_len(obj.submenus, dishes=True)
-        )
-
-    @staticmethod
     async def create_menu(uow: IMenuUoW, data: CreateMenu) -> OutputMenu:
         try:
-            return await AddMenu(uow)(data)
+            new_menu = await AddMenu(uow)(data)
+            return new_menu.to_dto()
         except IntegrityError:
             await uow.rollback()
 
-            raise MenuAlreadyExists
+        raise MenuAlreadyExists
 
-    async def update_menu(self, uow: IMenuUoW, data: UpdateMenu) -> OutputMenu:
+    @staticmethod
+    async def get_menus(uow: IMenuUoW) -> list[OutputMenu] | None:
+        return await GetMenus(uow)()
+
+    @staticmethod
+    async def get_menu(uow: IMenuUoW, menu_id: str) -> OutputMenu | MenuNotExists:
+        menu = await GetMenu(uow)(menu_id, load=True)
+        if menu:
+            return menu
+
+        raise MenuNotExists
+
+    @staticmethod
+    async def delete_menu(uow: IMenuUoW, menu_id: str) -> None:
+        menu = await DeleteMenu(uow)(menu_id)
+        if menu:
+            return
+
+        raise MenuNotExists
+
+    @staticmethod
+    async def update_menu(uow: IMenuUoW, data: UpdateMenu) -> OutputMenu | MenuNotExists | MenuDataEmpty:
         try:
             await PatchMenu(uow)(data.menu_id, data.dict(exclude_none=True, exclude={'menu_id'}))
-            updated_obj = await GetMenu(uow)(data.menu_id, load=True)
-            return await self._get_ready_info(updated_obj)
+            return await GetMenu(uow)(data.menu_id, load=True)
         except ProgrammingError:
             raise MenuDataEmpty
-
-    async def get_menus(self, uow: IMenuUoW) -> list[OutputMenu]:
-        menus = await GetMenus(uow)()
-
-        if menus:
-            menus_info = [await self._get_ready_info(menu) for menu in menus]
-
-            return menus_info
-
-        return menus
-
-    async def get_menu(self, uow: IMenuUoW, menu_id: str) -> OutputMenu:
-        menu = await GetMenu(uow)(menu_id, load=True)
-        return await self._get_ready_info(menu)

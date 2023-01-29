@@ -18,6 +18,16 @@ services:
     networks:
       custom_test:
 
+  test_cache:
+    image: redis:latest
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_TEST_PORT}:6379"
+    networks:
+      custom:
+
   app-test:
     build:
       context: .
@@ -32,7 +42,7 @@ services:
       - TEST=1
     depends_on:
       test_db:
-        condition: service_healthy
+        condition: service_completed_successfully
     networks:
       custom_test:
 

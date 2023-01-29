@@ -1,8 +1,10 @@
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.common.interfaces.uow import IBaseUoW
 from src.infrastructure.db.repositories.dish import DishRepository
 from src.infrastructure.db.repositories.menu import MenuRepository
+from src.infrastructure.db.repositories.redis.base import RedisRepository
 from src.infrastructure.db.repositories.submenu import SubMenuRepository
 
 
@@ -25,7 +27,8 @@ class MenuHolder:
 
 
 class SQLAlchemyUoW(SQLAlchemyBaseUoW):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, redis: Redis):
         super().__init__(session)
 
         self.menu_holder = MenuHolder(session)
+        self.redis_repo = RedisRepository(redis)
