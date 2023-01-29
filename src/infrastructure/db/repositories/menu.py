@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -15,7 +15,7 @@ class MenuRepository(BaseRepository[Menu]):
         query = select(self.model).options(
             joinedload(self.model.submenus).joinedload(SubMenu.dishes)
         )
-        result = (await self.session.execute(query)).scalars().unique()
+        result = (await self.session.execute(query)).unique().scalars()
         return result
 
     async def get_by_id_all(self, id_: str, load: bool) -> Menu:
@@ -26,3 +26,7 @@ class MenuRepository(BaseRepository[Menu]):
             )
         result = (await self.session.execute(query)).scalar()
         return result
+
+    async def delete_by_id(self, id_: str) -> None:
+        query = delete(self.model).where(self.model.id == id_)
+        await self.session.execute(query)
