@@ -111,7 +111,7 @@ async def delete_menu(
         status.HTTP_400_BAD_REQUEST: {
             'model': MenuEmptyRequestBodyError
         }
-    }
+    },
 )
 async def update_menu(
         menu_id: UUID4,

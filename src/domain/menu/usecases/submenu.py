@@ -66,6 +66,9 @@ class AddSubMenu(SubMenuUseCase):
         await self.uow.menu_holder.submenu_repo.refresh(submenu)
 
         await self.uow.redis_repo.delete(f'submenus-{data.menu_id}')
+        await self.uow.redis_repo.delete(data.menu_id)
+        await self.uow.redis_repo.delete('menus')
+
         await self.uow.redis_repo.put(str(submenu.id), json.dumps(submenu.to_dto().dict()))
 
         logger.info('New submenu - %s', data.title)

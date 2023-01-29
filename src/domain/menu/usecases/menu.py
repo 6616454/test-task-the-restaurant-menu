@@ -44,6 +44,8 @@ class GetMenu(MenuUseCase):
             ))
             return result_menu
 
+        raise MenuNotExists
+
 
 class GetMenus(MenuUseCase):
     async def __call__(self) -> list[OutputMenu]:
@@ -88,15 +90,15 @@ class AddMenu(MenuUseCase):
 
 class DeleteMenu(MenuUseCase):
     async def __call__(self, menu_id: str) -> MenuNotExists | None:
-        menu_obj = json.loads(await self.uow.redis_repo.get(menu_id))
+        menu_obj = await self.uow.menu_holder.menu_repo.get_by_id(menu_id)
         if menu_obj:
-            await self.uow.menu_holder.menu_repo.delete_by_id(menu_obj['id'])
+            await self.uow.menu_holder.menu_repo.delete(menu_obj)
             await self.uow.commit()
 
-            await self.uow.redis_repo.delete(menu_obj['id'])
+            await self.uow.redis_repo.delete(str(menu_obj.id))
             await self.uow.redis_repo.delete('menus')
 
-            logger.info('Menu was deleted - %s', menu_obj['title'])
+            logger.info('Menu was deleted - %s', menu_obj.title)
             return menu_obj
 
 
