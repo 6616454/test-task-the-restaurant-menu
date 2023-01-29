@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import pytest
@@ -57,7 +58,8 @@ class TestSubMenuHandlers:
             client,
             menu_data,
             create_menu_in_database,
-            get_submenu_from_database
+            get_submenu_from_database,
+            get_cache
     ):
         test_data = {
             'title': 'some_title',
@@ -76,6 +78,12 @@ class TestSubMenuHandlers:
 
         assert data['title'] == submenu_from_db.title
         assert data['description'] == submenu_from_db.description
+
+        submenu_from_cache = json.loads(await get_cache.get(data['id']))
+
+        assert data['title'] == submenu_from_cache['title']
+        assert data['description'] == submenu_from_cache['description']
+        assert data['dishes_count'] == 0
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, test_data, expected_result, status_code', [
@@ -177,7 +185,8 @@ class TestSubMenuHandlers:
             menu_data,
             submenu_data,
             create_submenu_in_database,
-            create_menu_in_database
+            create_menu_in_database,
+            get_cache
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
@@ -190,6 +199,12 @@ class TestSubMenuHandlers:
         assert data['description'] == submenu_data['description']
         assert data['dishes_count'] == 0
         assert response.status_code == 200
+
+        submenu_from_cache = json.loads(await get_cache.get(submenu_data['submenu_id']))
+        assert data['id'] == submenu_from_cache['id']
+        assert data['title'] == submenu_from_cache['title']
+        assert data['description'] == submenu_from_cache['description']
+        assert submenu_from_cache['dishes_count'] == 0
 
     @pytest.mark.asyncio
     async def test_get_submenu_404(self, client):
@@ -271,7 +286,8 @@ class TestSubMenuHandlers:
             submenu_data,
             create_menu_in_database,
             create_submenu_in_database,
-            get_submenu_from_database
+            get_submenu_from_database,
+            get_cache
 
     ):
         await create_menu_in_database(**menu_data)
@@ -288,6 +304,11 @@ class TestSubMenuHandlers:
             assert data['title'] == submenu_from_db.title
             assert data['description'] == submenu_from_db.description
 
+            submenu_from_cache = json.loads(await get_cache.get(data['id']))
+
+            assert data['title'] == submenu_from_cache['title']
+            assert data['description'] == submenu_from_cache['description']
+
     @pytest.mark.asyncio
     async def test_delete_submenu(
             self,
@@ -296,7 +317,8 @@ class TestSubMenuHandlers:
             submenu_data,
             create_menu_in_database,
             create_submenu_in_database,
-            get_submenu_from_database
+            get_submenu_from_database,
+            get_cache
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
@@ -311,6 +333,10 @@ class TestSubMenuHandlers:
         submenu_from_db = await get_submenu_from_database(submenu_data['submenu_id'])
 
         assert submenu_from_db is None
+
+        submenu_from_cache = await get_cache.get(submenu_data['submenu_id'])
+
+        assert submenu_from_cache is None
 
     @pytest.mark.asyncio
     async def test_delete_submenu_404(self, client):

@@ -111,7 +111,7 @@ class TestMenuHandlers:
         assert response.status_code == status_code
 
     @pytest.mark.asyncio
-    async def test_get_menu(self, client, create_menu_in_database, menu_data):
+    async def test_get_menu(self, client, create_menu_in_database, menu_data, get_cache):
         await create_menu_in_database(**menu_data)
         response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}')
         data = response.json()
@@ -123,6 +123,14 @@ class TestMenuHandlers:
         assert data['dishes_count'] == 0
 
         assert response.status_code == 200
+
+        menu_from_cache = json.loads(await get_cache.get(menu_data['menu_id']))
+
+        assert data['id'] == menu_from_cache['id']
+        assert data['title'] == menu_from_cache['title']
+        assert data['description'] == menu_from_cache['description']
+        assert menu_from_cache['submenus_count'] == 0
+        assert menu_from_cache['dishes_count'] == 0
 
     @pytest.mark.asyncio
     async def test_get_menu_404(self, client):
