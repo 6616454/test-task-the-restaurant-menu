@@ -32,7 +32,9 @@ router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': MenuNotFoundError
         }
-    }
+    },
+    summary='Get menu',
+    description='Getting the menu by ID'
 )
 async def get_menu(
         menu_id: UUID4,
@@ -47,7 +49,11 @@ async def get_menu(
         return MenuNotFoundError()
 
 
-@router.get('/')
+@router.get(
+    '/',
+    summary='Get menus',
+    description='Getting the full menu list'
+)
 async def get_menus(
         uow: SQLAlchemyUoW = Depends(uow_provider),
         menu_service: MenuService = Depends(menu_service_stub)
@@ -62,7 +68,9 @@ async def get_menus(
             'model': MenuAlreadyExistsError
         }
     },
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    summary='Create menu',
+    description='Creating a new menu'
 )
 async def create_menu(
         data: CreateRequestMenu,
@@ -86,7 +94,9 @@ async def create_menu(
         status.HTTP_404_NOT_FOUND: {
             'model': MenuNotFoundError
         }
-    }
+    },
+    summary='Delete menu',
+    description='Deleting the menu by ID'
 )
 async def delete_menu(
         menu_id: UUID4,
@@ -112,6 +122,8 @@ async def delete_menu(
             'model': MenuEmptyRequestBodyError
         }
     },
+    summary='Update menu',
+    description='Updating the menu by ID'
 )
 async def update_menu(
         menu_id: UUID4,

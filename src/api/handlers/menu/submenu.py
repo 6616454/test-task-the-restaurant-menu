@@ -31,12 +31,13 @@ router = APIRouter(
 
 @router.get(
     '/{menu_id}/submenus',
-    description='Get submenus',
     responses={
         status.HTTP_404_NOT_FOUND: {
             'model': MenuNotFoundError
         }
-    }
+    },
+    summary='Get submenus',
+    description='Getting a complete list of submenus of a specific menu'
 )
 async def get_submenus(
         menu_id: UUID4,
@@ -53,12 +54,13 @@ async def get_submenus(
 
 @router.get(
     '/{menu_id}/submenus/{submenu_id}',
-    description='Get submenu by menu_id and submenu_id',
     responses={
         status.HTTP_404_NOT_FOUND: {
             'model': SubMenuNotFoundError
         }
-    }
+    },
+    summary='Get submenu',
+    description='Getting a specific submenu by menu and ID'
 )
 async def get_submenu(
         menu_id: UUID4,
@@ -76,7 +78,6 @@ async def get_submenu(
 
 @router.post(
     '/{menu_id}/submenus',
-    description='Create submenu by menu_id',
     responses={
         status.HTTP_400_BAD_REQUEST: {
             'model': SubMenuAlreadyExistsError
@@ -85,7 +86,9 @@ async def get_submenu(
             'model': MenuNotFoundError
         }
     },
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    summary='Create submenu',
+    description='Creating a new submenu for the menu'
 )
 async def create_submenu(
         data: CreateRequestSubMenu,
@@ -113,7 +116,9 @@ async def create_submenu(
         status.HTTP_404_NOT_FOUND: {
             'model': SubMenuNotFoundError
         },
-    }
+    },
+    summary='Delete submenu',
+    description='Deleting a submenu of a certain menu by ID'
 )
 async def delete_submenu(
         submenu_id: UUID4,
@@ -139,7 +144,9 @@ async def delete_submenu(
         status.HTTP_400_BAD_REQUEST: {
             'model': SubMenuEmptyRequestBodyError
         }
-    }
+    },
+    summary='Update submenu',
+    description='Updating a submenu of a certain menu by ID'
 )
 async def update_submenu(
         menu_id: UUID4,
