@@ -28,7 +28,6 @@ class GetSubMenu(SubMenuUseCase):
                 submenu.to_dto(len(submenu.dishes)).dict()
             ))
             return submenu.to_dto(len(submenu.dishes))
-        raise SubMenuNotExists
 
 
 class GetSubMenus(SubMenuUseCase):
@@ -49,8 +48,6 @@ class GetSubMenus(SubMenuUseCase):
                 return output_submenus
 
             return submenus
-
-        raise MenuNotExists
 
 
 class AddSubMenu(SubMenuUseCase):
@@ -84,11 +81,12 @@ class DeleteSubMenu(SubMenuUseCase):
             await self.uow.commit()
 
             await self.uow.redis_repo.delete(submenu_id)
+            await self.uow.redis_repo.delete(menu_id)
             await self.uow.redis_repo.delete(f'submenus-{menu_id}')
+            await self.uow.redis_repo.delete('menus')
             logger.info('Submenu was deleted - %s', submenu_obj.title)
-            return
 
-        raise SubMenuNotExists
+            return submenu_obj
 
 
 class PatchSubMenu(SubMenuUseCase):
@@ -98,13 +96,19 @@ class PatchSubMenu(SubMenuUseCase):
 
         await self.uow.redis_repo.delete(submenu_id)
         await self.uow.redis_repo.delete(f'submenus-{menu_id}')
+        await self.uow.redis_repo.delete('menus')
 
 
 class SubMenuService:
     """Represents business logic for Submenu entity."""
+
     @staticmethod
     async def delete_submenu(uow: IMenuUoW, menu_id: str, submenu_id: str) -> None:
-        return await DeleteSubMenu(uow)(menu_id, submenu_id)
+        submenu = await DeleteSubMenu(uow)(menu_id, submenu_id)
+        if submenu:
+            return
+
+        raise SubMenuNotExists
 
     @staticmethod
     async def create_submenu(uow: IMenuUoW, data: CreateSubMenu) -> OutputSubMenu:
@@ -123,14 +127,26 @@ class SubMenuService:
             await PatchSubMenu(uow)(data.menu_id, data.submenu_id, data.dict(
                 exclude_none=True, exclude={'submenu_id', 'menu_id'}
             ))
-            return await GetSubMenu(uow)(data.menu_id, data.submenu_id, load=True)
+            new_submenu = await GetSubMenu(uow)(data.menu_id, data.submenu_id, load=True)
+            if new_submenu:
+                return new_submenu
+            raise SubMenuNotExists
         except ProgrammingError:
             raise SubMenuDataEmpty
 
     @staticmethod
     async def get_submenus(uow: IMenuUoW, menu_id: str) -> list[OutputSubMenu] | None:
-        return await GetSubMenus(uow)(menu_id)
+        submenus = await GetSubMenus(uow)(menu_id)
+
+        if submenus is None and not isinstance(submenus, list):
+            raise MenuNotExists
+
+        return submenus
 
     @staticmethod
     async def get_submenu(uow: IMenuUoW, menu_id: str, submenu_id: str) -> OutputSubMenu:
-        return await GetSubMenu(uow)(menu_id, submenu_id, load=True)
+        submenu = await GetSubMenu(uow)(menu_id, submenu_id, load=True)
+        if submenu:
+            return submenu
+
+        raise SubMenuNotExists
