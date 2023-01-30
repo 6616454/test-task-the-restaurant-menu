@@ -28,7 +28,7 @@ make up-tests
 ```
 5.For run lint-instruments(pre-commit hook scripts) use the "make lint" command
 ```
-poetry install
+poetry install --only dev or pip install pre-commit if you used pip
 make lint
 ```
 

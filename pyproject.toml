@@ -11,14 +11,16 @@ fastapi = "^0.89.1"
 pydantic = {extras = ["dotenv"], version = "^1.10.4"}
 alembic = "^1.9.1"
 uvicorn = "^0.20.0"
+sqlalchemy = "^1.4.46"
 asyncpg = "^0.27.0"
 orjson = "^3.8.5"
 redis = "^4.4.2"
-pre-commit = "^3.0.2"
+
 
 [tool.poetry.group.dev]
 
 [tool.poetry.group.dev.dependencies]
+pre-commit = "^3.0.2"
 sqlalchemy2-stubs = "^0.0.2a31"
 pytest = "^7.2.1"
 httpx = "^0.23.3"
