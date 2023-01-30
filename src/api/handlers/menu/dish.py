@@ -131,7 +131,7 @@ async def delete_dish(
         dish_service: DishService = Depends(dish_service_stub)
 ):
     try:
-        await dish_service.delete_dish(uow, str(submenu_id), str(dish_id))
+        await dish_service.delete_dish(uow, str(menu_id), str(submenu_id), str(dish_id))
         return DishDeleteResponse()
     except DishNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
