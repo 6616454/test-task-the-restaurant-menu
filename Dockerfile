@@ -10,6 +10,7 @@ COPY poetry.lock pyproject.toml ./
 
 RUN python -m pip install --upgrade pip && pip install poetry && poetry config virtualenvs.create false
 
+
 COPY . /app
 
 
@@ -25,7 +26,7 @@ FROM build_app as test
 
 RUN poetry install --with dev
 
-CMD alembic upgrade head && pytest -vv
+CMD pre-commit run --all-files && alembic upgrade head && pytest -vv
 
 
 
