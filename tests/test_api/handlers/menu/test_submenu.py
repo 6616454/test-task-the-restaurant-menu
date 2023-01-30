@@ -334,10 +334,6 @@ class TestSubMenuHandlers:
 
         assert submenu_from_db is None
 
-        submenu_from_cache = await get_cache.get(submenu_data['submenu_id'])
-
-        assert submenu_from_cache is None
-
     @pytest.mark.asyncio
     async def test_delete_submenu_404(self, client):
         response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}')

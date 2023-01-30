@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import pytest
@@ -72,7 +73,8 @@ class TestDishHandlers:
             create_menu_in_database,
             submenu_data,
             create_submenu_in_database,
-            get_dish_from_database
+            get_dish_from_database,
+            get_cache
     ):
         test_data = {
             'title': 'some_title',
@@ -96,6 +98,12 @@ class TestDishHandlers:
         assert data['title'] == dish_from_db.title
         assert data['description'] == dish_from_db.description
         assert data['price'] == dish_from_db.price
+
+        dish_from_cache = json.loads(await get_cache.get(data['id']))
+
+        assert data['title'] == dish_from_cache['title']
+        assert data['description'] == dish_from_cache['description']
+        assert data['price'] == dish_from_cache['price']
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize('menu_id, submenu_id, test_data, expected_result, status_code', [
@@ -208,6 +216,7 @@ class TestDishHandlers:
             create_submenu_in_database,
             create_menu_in_database,
             create_dish_in_database,
+            get_cache
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
@@ -223,6 +232,13 @@ class TestDishHandlers:
         assert data['description'] == dish_data['description']
         assert data['price'] == dish_data['price']
         assert response.status_code == 200
+
+        dish_from_cache = json.loads(await get_cache.get(data['id']))
+
+        assert data['id'] == dish_from_cache['id']
+        assert data['title'] == dish_from_cache['title']
+        assert data['description'] == dish_from_cache['description']
+        assert data['price'] == dish_from_cache['price']
 
     @pytest.mark.asyncio
     async def test_get_dish_404(self, client):
@@ -328,7 +344,8 @@ class TestDishHandlers:
             create_menu_in_database,
             create_submenu_in_database,
             create_dish_in_database,
-            get_dish_from_database
+            get_dish_from_database,
+            get_cache
 
     ):
         await create_menu_in_database(**menu_data)
@@ -349,6 +366,12 @@ class TestDishHandlers:
             assert data['title'] == dish_from_db.title
             assert data['description'] == dish_from_db.description
             assert data['price'] == dish_from_db.price
+
+            dish_from_cache = json.loads(await get_cache.get(data['id']))
+
+            assert data['title'] == dish_from_cache['title']
+            assert data['description'] == dish_from_cache['description']
+            assert data['price'] == dish_from_cache['price']
 
     @pytest.mark.asyncio
     async def test_delete_dish(
@@ -381,7 +404,7 @@ class TestDishHandlers:
 
     @pytest.mark.asyncio
     async def test_delete_dish_404(self, client):
-        response = await client.get(
+        response = await client.delete(
             f'api/v1/menus/{str(uuid.uuid4())}/submenus/{str(uuid.uuid4())}/dishes/{str(uuid.uuid4())}'
         )
 

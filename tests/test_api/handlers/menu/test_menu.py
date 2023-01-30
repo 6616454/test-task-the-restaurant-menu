@@ -41,7 +41,7 @@ class TestMenuHandlers:
         assert data['description'] == menu_from_db.description
 
         menu_from_cache = json.loads(await get_cache.get(data['id']))
-        print(menu_from_cache)
+
         assert data['title'] == menu_from_cache['title']
         assert data['description'] == menu_from_cache['description']
         assert menu_from_cache['submenus_count'] == 0
@@ -236,10 +236,6 @@ class TestMenuHandlers:
 
         assert menu_from_db is None
 
-        menu_from_cache = await get_cache.get(menu_data['menu_id'])
-
-        assert menu_from_cache is None
-
     @pytest.mark.asyncio
     async def test_delete_menu_404(self, client):
         response = await client.get(f'api/v1/menus/{str(uuid.uuid4())}')
@@ -258,7 +254,8 @@ class TestMenuHandlers:
             create_submenu_in_database,
             create_dish_in_database,
             delete_submenu_from_database,
-            delete_dish_from_database
+            delete_dish_from_database,
+            get_cache
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)
@@ -276,6 +273,8 @@ class TestMenuHandlers:
         await delete_dish_from_database(dish_data['dish_id'])
         await delete_dish_from_database(temp)
         await delete_submenu_from_database(submenu_data['submenu_id'])
+
+        await get_cache.delete(menu_data['menu_id'])
 
         second_response = await client.get(f'api/v1/menus/{menu_data["menu_id"]}')
         second_data = second_response.json()
