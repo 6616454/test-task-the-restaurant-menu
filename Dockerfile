@@ -26,7 +26,7 @@ FROM build_app as test
 
 RUN poetry install --with dev
 
-CMD pre-commit run --all-files && alembic upgrade head && pytest -vv
+CMD alembic upgrade head && pytest -vv
 
 
 

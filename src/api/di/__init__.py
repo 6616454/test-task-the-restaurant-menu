@@ -1,4 +1,3 @@
-from fastapi import Response
 from fastapi import FastAPI
 from redis.asyncio.client import Redis
 from sqlalchemy.orm import sessionmaker
