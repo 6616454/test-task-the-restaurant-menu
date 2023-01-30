@@ -1,4 +1,4 @@
-from pydantic import UUID4, validator
+from pydantic import validator
 
 from src.domain.common.dto.base import DTO
 from src.domain.menu.dto.menu import BaseMenu
@@ -17,7 +17,7 @@ class BaseDish(BaseMenu):
 
 class OutputDish(DTO):
     # Продублировал отдельно, чтобы подогнать под тесты
-    id: UUID4
+    id: str
     title: str
     description: str
     price: str

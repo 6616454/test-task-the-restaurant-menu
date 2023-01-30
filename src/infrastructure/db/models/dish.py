@@ -4,6 +4,7 @@ from sqlalchemy import Column, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from src.domain.menu.dto.dish import OutputDish
 from src.infrastructure.db.base import Base
 
 
@@ -18,3 +19,11 @@ class Dish(Base):
 
     submenu = relationship(
         'SubMenu', back_populates='dishes', single_parent=True)
+
+    def to_dto(self) -> OutputDish:
+        return OutputDish(
+            id=str(self.id),
+            title=self.title,
+            description=self.description,
+            price=self.price
+        )
