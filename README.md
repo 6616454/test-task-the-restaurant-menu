@@ -16,7 +16,7 @@ git clone https://github.com/6616454/test-task-the-restaurant-menu.git
 cp .envexample .env
 ```
 
-3.Run the "make up" command
+3.Run the "make up" command for start project
 
 ```
 make up
@@ -26,9 +26,10 @@ make up
 ```
 make up-tests
 ```
-5.For run lint-instruments(pre-commit hook scripts) use the "make lint" command
+5.For run lint-instruments(pre-commit hook scripts) install dev dependencies and use the "make lint" command
 ```
 poetry install --only dev
+
 make lint
 ```
 
