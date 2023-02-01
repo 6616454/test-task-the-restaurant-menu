@@ -1,5 +1,6 @@
 import json
 import logging
+from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -85,7 +86,7 @@ class AddMenu(MenuUseCase):
 
         logger.info('New menu - %s', data.title)
 
-        return menu
+        return menu.to_dto()
 
 
 class DeleteMenu(MenuUseCase):
@@ -111,14 +112,14 @@ class PatchMenu(MenuUseCase):
         await self.uow.redis_repo.delete('menus')
 
 
+@dataclass
 class MenuService:
     """Represents business logic for Menu entity."""
 
     @staticmethod
     async def create_menu(uow: IMenuUoW, data: CreateMenu) -> OutputMenu:
         try:
-            new_menu = await AddMenu(uow)(data)
-            return new_menu.to_dto()
+            return await AddMenu(uow)(data)
         except IntegrityError:
             await uow.rollback()
 

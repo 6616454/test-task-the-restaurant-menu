@@ -1,5 +1,6 @@
 import json
 import logging
+from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -99,6 +100,7 @@ class PatchSubMenu(SubMenuUseCase):
         await self.uow.redis_repo.delete('menus')
 
 
+@dataclass
 class SubMenuService:
     """Represents business logic for Submenu entity."""
 

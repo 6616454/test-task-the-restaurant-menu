@@ -1,5 +1,6 @@
 import json
 import logging
+from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -104,6 +105,7 @@ class PatchDish(DishUseCase):
         await self.uow.redis_repo.delete(f'dishes-{submenu_id}')
 
 
+@dataclass
 class DishService:
     """Represents business logic for Dish entity."""
 
