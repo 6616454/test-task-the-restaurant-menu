@@ -28,7 +28,7 @@ make up-tests
 ```
 5.For run lint-instruments(pre-commit hook scripts) install dev dependencies and use the "make lint" command
 ```
-poetry install --only dev
+poetry install --with dev
 
 make lint
 ```
