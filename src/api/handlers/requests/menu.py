@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseConfig, BaseModel
 
 
 class CreateRequestMenu(BaseModel):
