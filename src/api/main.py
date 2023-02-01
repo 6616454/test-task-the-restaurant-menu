@@ -25,9 +25,9 @@ def build_app() -> FastAPI:
 
     # setup application
     setup_di(app=app, pool=pool, redis=create_redis(
-        settings.redis_host,
-        settings.redis_port,
-        settings.redis_db
+        redis_host=settings.redis_host,
+        redis_port=settings.redis_port,
+        redis_db=settings.redis_db
     ))
     setup_routes(router=app.router)
 
