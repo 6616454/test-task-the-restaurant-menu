@@ -35,9 +35,9 @@ def build_test_app() -> FastAPI:
 
     # setup test application
     setup_di(app=app, pool=pool, redis=create_redis(
-        settings.redis_test_cache,
-        settings.redis_port,
-        settings.redis_test_db
+        redis_host=settings.redis_test_cache,
+        redis_port=settings.redis_port,
+        redis_db=settings.redis_test_db
     ))
     setup_routes(router=app.router)
 
