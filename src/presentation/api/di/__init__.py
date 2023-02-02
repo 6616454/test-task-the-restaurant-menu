@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from redis.asyncio.client import Redis  # type: ignore
 from sqlalchemy.orm import sessionmaker
 
-from src.api.di.providers.db import DBProvider, uow_provider
-from src.api.di.providers.services import (
+from src.presentation.api.di.providers.db import DBProvider, uow_provider
+from src.presentation.api.di.providers.services import (
     provide_menu_service,
     menu_service_stub,
     submenu_service_stub,

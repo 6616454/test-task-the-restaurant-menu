@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.api.di import setup_di
-from src.api.handlers import setup_routes
+from src.presentation.api.di import setup_di
+from src.presentation.api.handlers import setup_routes
 from src.core.logging import setup_logging
 from src.core.settings import get_settings
 from src.infrastructure.db.base import create_pool, create_redis

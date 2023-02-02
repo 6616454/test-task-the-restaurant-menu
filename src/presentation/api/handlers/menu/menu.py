@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 
-from src.api.di import menu_service_stub, uow_provider
-from src.api.handlers.requests.menu import CreateRequestMenu, UpdateRequestMenu
-from src.api.handlers.responses.exceptions import (
+from src.presentation.api.di import menu_service_stub, uow_provider
+from src.presentation.api.handlers.requests.menu import CreateRequestMenu, UpdateRequestMenu
+from src.presentation.api.handlers.responses.exceptions import (
     MenuAlreadyExistsError,
     MenuEmptyRequestBodyError,
     MenuNotFoundError,
 )
-from src.api.handlers.responses.menu import MenuDeleteResponse
+from src.presentation.api.handlers.responses.menu import MenuDeleteResponse
 from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
 from src.domain.menu.exceptions.menu import (
     MenuAlreadyExists,

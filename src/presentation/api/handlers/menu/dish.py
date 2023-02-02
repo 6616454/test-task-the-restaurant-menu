@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4, ValidationError
 
-from src.api.di import dish_service_stub, uow_provider
-from src.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
-from src.api.handlers.responses.exceptions import (
+from src.presentation.api.di import dish_service_stub, uow_provider
+from src.presentation.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
+from src.presentation.api.handlers.responses.exceptions import (
     DishAlreadyExistsError,
     DishEmptyRequestBodyError,
     DishNotFoundError,
     DishPriceValidationError,
     SubMenuNotFoundError,
 )
-from src.api.handlers.responses.menu import DishDeleteResponse
+from src.presentation.api.handlers.responses.menu import DishDeleteResponse
 from src.domain.menu.dto.dish import CreateDish, OutputDish, UpdateDish
 from src.domain.menu.exceptions.dish import (
     DishAlreadyExists,

@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from src.api.handlers.responses.base import ApiError
+from src.presentation.api.handlers.responses.base import ApiError
 
 
 class MenuNotFoundError(ApiError):
