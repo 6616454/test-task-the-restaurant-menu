@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """Main settings of Application"""
 
     # APP settings
-    title: str = 'RestaurantApplication'
+    title: str = "RestaurantApplication"
 
     # DB settings
     database_url: str
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     redis_test_db: int = 2
 
     class Config:
-        env_file = '.env'
+        env_file = ".env"
 
 
 def get_settings() -> Settings:

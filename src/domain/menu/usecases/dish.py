@@ -16,14 +16,16 @@ from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import DishUseCase
 from src.infrastructure.db.models.dish import Dish
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger("main_logger")
 
 
-async def clean_cache(cache: ICache, menu_id: str, submenu_id: str, dish_id: str = None):
-    await cache.delete('menus')
-    await cache.delete('submenus')
-    await cache.delete(f'submenus-{menu_id}')
-    await cache.delete(f'dishes-{submenu_id}')
+async def clean_cache(
+    cache: ICache, menu_id: str, submenu_id: str, dish_id: str | None = None
+):
+    await cache.delete("menus")
+    await cache.delete("submenus")
+    await cache.delete(f"submenus-{menu_id}")
+    await cache.delete(f"dishes-{submenu_id}")
     await cache.delete(menu_id)
     await cache.delete(submenu_id)
 
@@ -33,7 +35,7 @@ async def clean_cache(cache: ICache, menu_id: str, submenu_id: str, dish_id: str
 
 class GetDishes(DishUseCase):
     async def __call__(self, menu_id: str, submenu_id: str):
-        cache = await self.uow.redis_repo.get(f'dishes-{submenu_id}')
+        cache = await self.uow.redis_repo.get(f"dishes-{submenu_id}")
 
         if cache:
             return json.loads(cache)
@@ -41,7 +43,9 @@ class GetDishes(DishUseCase):
         if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
             dishes = await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
             output_dishes = [dish.to_dto().dict() for dish in dishes]
-            await self.uow.redis_repo.put(f'dishes-{submenu_id}', json.dumps(output_dishes))
+            await self.uow.redis_repo.put(
+                f"dishes-{submenu_id}", json.dumps(output_dishes)
+            )
 
             return output_dishes
 
@@ -55,7 +59,9 @@ class GetDish(DishUseCase):
         if cache:
             return json.loads(cache)
 
-        dish = await self.uow.menu_holder.dish_repo.get_by_submenu_and_id(submenu_id, dish_id)
+        dish = await self.uow.menu_holder.dish_repo.get_by_submenu_and_id(
+            submenu_id, dish_id
+        )
         if dish:
             await self.uow.redis_repo.put(dish_id, json.dumps(dish.to_dto().dict()))
             return dish.to_dto()
@@ -67,7 +73,7 @@ class AddDish(DishUseCase):
             title=data.title,
             description=data.description,
             price=data.price,
-            submenu_id=data.submenu_id
+            submenu_id=data.submenu_id,
         )
 
         await self.uow.menu_holder.dish_repo.save(new_dish)
@@ -76,23 +82,27 @@ class AddDish(DishUseCase):
 
         await clean_cache(self.uow.redis_repo, data.menu_id, data.submenu_id)
 
-        await self.uow.redis_repo.put(str(new_dish.id), json.dumps(new_dish.to_dto().dict()))
+        await self.uow.redis_repo.put(
+            str(new_dish.id), json.dumps(new_dish.to_dto().dict())
+        )
 
-        logger.info('Created new dish - %s', data.title)
+        logger.info("Created new dish - %s", data.title)
 
         return new_dish.to_dto()
 
 
 class DeleteDish(DishUseCase):
     async def __call__(self, menu_id: str, submenu_id: str, dish_id: str):
-        dish_obj = await self.uow.menu_holder.dish_repo.get_by_submenu_and_id(submenu_id, dish_id)
+        dish_obj = await self.uow.menu_holder.dish_repo.get_by_submenu_and_id(
+            submenu_id, dish_id
+        )
         if dish_obj:
             await self.uow.menu_holder.dish_repo.delete(dish_obj)
             await self.uow.commit()
 
             await clean_cache(self.uow.redis_repo, menu_id, submenu_id, dish_id)
 
-            logger.info('Dish was deleted - %s', dish_obj.title)
+            logger.info("Dish was deleted - %s", dish_obj.title)
             return dish_obj
 
 
@@ -102,7 +112,7 @@ class PatchDish(DishUseCase):
         await self.uow.commit()
 
         await self.uow.redis_repo.delete(dish_id)
-        await self.uow.redis_repo.delete(f'dishes-{submenu_id}')
+        await self.uow.redis_repo.delete(f"dishes-{submenu_id}")
 
 
 @dataclass
@@ -124,14 +134,18 @@ class DishService:
     @staticmethod
     async def create_dish(uow: IMenuUoW, data: CreateDish) -> Dish:
         try:
-            if await uow.menu_holder.submenu_repo.get_by_menu_id(data.menu_id, load=False):
+            if await uow.menu_holder.submenu_repo.get_by_menu_id(
+                data.menu_id, load=False
+            ):
                 return await AddDish(uow)(data)
             raise SubMenuNotExists
         except IntegrityError:
             raise DishAlreadyExists
 
     @staticmethod
-    async def delete_dish(uow: IMenuUoW, menu_id: str, submenu_id: str, dish_id: str) -> None:
+    async def delete_dish(
+        uow: IMenuUoW, menu_id: str, submenu_id: str, dish_id: str
+    ) -> None:
         dish = await DeleteDish(uow)(menu_id, submenu_id, dish_id)
         if dish:
             return
@@ -141,10 +155,13 @@ class DishService:
     @staticmethod
     async def update_dish(uow: IMenuUoW, data: UpdateDish) -> Dish:
         try:
-            await PatchDish(uow)(data.submenu_id, data.dish_id, data.dict(
-                exclude_none=True,
-                exclude={'menu_id', 'submenu_id', 'dish_id'}
-            ))
+            await PatchDish(uow)(
+                data.submenu_id,
+                data.dish_id,
+                data.dict(
+                    exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}
+                ),
+            )
             updated_obj = await GetDish(uow)(data.submenu_id, data.dish_id)
             if updated_obj:
                 return updated_obj

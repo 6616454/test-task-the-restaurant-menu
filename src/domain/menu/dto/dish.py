@@ -7,12 +7,12 @@ from src.domain.menu.dto.menu import BaseMenu
 class BaseDish(BaseMenu):
     price: str
 
-    @validator('price')
+    @validator("price")
     def price_validator(cls, v):
         if v is None:
             return
 
-        return f'{round(float(v), 2):.2f}'
+        return f"{round(float(v), 2):.2f}"
 
 
 class OutputDish(DTO):
@@ -32,6 +32,6 @@ class UpdateDish(BaseDish):
     menu_id: str
     submenu_id: str
     dish_id: str
-    title: str = None
-    description: str = None
-    price: str = None
+    title: str | None = None  # type: ignore
+    description: str | None = None  # type: ignore
+    price: str | None = None  # type: ignore

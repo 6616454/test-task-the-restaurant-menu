@@ -22,5 +22,5 @@ class CreateMenu(BaseMenu):
 
 class UpdateMenu(BaseMenu):
     menu_id: str
-    title: str | None = None
-    description: str | None = None
+    title: str | None = None  # type: ignore
+    description: str | None = None  # type: ignore

@@ -1,10 +1,10 @@
 import logging
 
-from redis.asyncio import Redis
+from redis.asyncio import Redis  # type: ignore
 
 from src.domain.common.interfaces.cache import ICache
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger("main_logger")
 
 
 class RedisRepository(ICache):
@@ -15,7 +15,7 @@ class RedisRepository(ICache):
         return await self._redis.get(name)
 
     async def put(self, name: str, value: str, expire_at: int | None = None) -> None:
-        logger.info('Set new value %s - %s', name, value)
+        logger.info("Set new value %s - %s", name, value)
 
         if expire_at:
             await self._redis.set(name, value, ex=expire_at)
@@ -24,5 +24,5 @@ class RedisRepository(ICache):
         await self._redis.set(name, value)
 
     async def delete(self, name: str) -> None:
-        logger.info('Delete value - %s', name)
+        logger.info("Delete value - %s", name)
         await self._redis.delete(name)

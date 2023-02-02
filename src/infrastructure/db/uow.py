@@ -1,4 +1,4 @@
-from redis.asyncio.client import Redis
+from redis.asyncio.client import Redis  # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.common.interfaces.uow import IBaseUoW

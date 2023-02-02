@@ -1,4 +1,4 @@
-from redis.asyncio.client import Redis
+from redis.asyncio.client import Redis  # type: ignore
 from sqlalchemy.orm import sessionmaker
 
 from src.infrastructure.db.uow import SQLAlchemyUoW
@@ -9,7 +9,6 @@ def uow_provider() -> None:
 
 
 class DBProvider:
-
     def __init__(self, pool: sessionmaker, redis: Redis):
         self.pool = pool
         self.redis = redis

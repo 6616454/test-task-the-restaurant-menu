@@ -15,5 +15,6 @@ class DishRepository(BaseRepository[Dish]):
 
     async def get_by_submenu_and_id(self, submenu_id: str, dish_id: str) -> Dish:
         query = select(self.model).where(
-            and_(self.model.id == dish_id, self.model.submenu_id == submenu_id))
+            and_(self.model.id == dish_id, self.model.submenu_id == submenu_id)
+        )
         return (await self.session.execute(query)).scalar()

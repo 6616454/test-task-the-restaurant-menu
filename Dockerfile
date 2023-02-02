@@ -27,6 +27,3 @@ FROM build_app as test
 RUN poetry install --with dev
 
 CMD alembic upgrade head && pytest -vv
-
-
-

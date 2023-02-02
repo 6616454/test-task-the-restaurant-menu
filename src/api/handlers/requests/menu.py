@@ -14,7 +14,7 @@ class CreateRequestDish(CreateRequestMenu):
     price: str
 
 
-class UpdateRequestMenu(CreateRequestMenu):
+class UpdateRequestMenu(BaseModel):
     title: str | None = None
     description: str | None = None
 

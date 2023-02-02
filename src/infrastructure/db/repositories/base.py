@@ -5,11 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.db.base import Base
 
-Model = TypeVar('Model', bound=Base)
+Model = TypeVar("Model", bound=Base)
 
 
 class BaseRepository(Generic[Model]):
-
     def __init__(self, model: type[Model], session: AsyncSession):
         self.model = model
         self.session = session
@@ -23,8 +22,7 @@ class BaseRepository(Generic[Model]):
         return result.scalars().all()
 
     async def update_obj(self, id_: str, **kwargs) -> None:
-        query = update(self.model).where(self.model.id == id_).values(
-            kwargs)
+        query = update(self.model).where(self.model.id == id_).values(kwargs)
         await self.session.execute(query)
 
     async def save(self, obj: Model) -> None:

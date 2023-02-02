@@ -9,20 +9,20 @@ from src.infrastructure.db.base import Base
 
 
 class SubMenu(Base):
-    __tablename__ = 'submenu'
+    __tablename__ = "submenu"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(32), unique=True, nullable=False)
     description = Column(Text, nullable=False)
 
-    menu_id = Column(UUID, ForeignKey('menu.id', ondelete='CASCADE'))
+    menu_id = Column(UUID, ForeignKey("menu.id", ondelete="CASCADE"))
 
-    menu = relationship('Menu', back_populates='submenus', single_parent=True)
-    dishes = relationship('Dish', cascade='all, delete-orphan')
+    menu = relationship("Menu", back_populates="submenus", single_parent=True)
+    dishes = relationship("Dish", cascade="all, delete-orphan")
 
     def to_dto(self, dishes_count: int = 0) -> OutputSubMenu:
         return OutputSubMenu(
             id=str(self.id),
             title=self.title,
             description=self.description,
-            dishes_count=dishes_count
+            dishes_count=dishes_count,
         )

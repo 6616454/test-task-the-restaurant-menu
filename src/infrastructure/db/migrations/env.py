@@ -14,10 +14,10 @@ from src.infrastructure.db.base import Base
 # access to the values within the .ini file in use.
 config = context.config
 
-if os.getenv('TEST'):
-    config.set_main_option('sqlalchemy.url', get_settings().database_test_url)
+if os.getenv("TEST"):
+    config.set_main_option("sqlalchemy.url", get_settings().database_test_url)
 else:
-    config.set_main_option('sqlalchemy.url', get_settings().database_url)
+    config.set_main_option("sqlalchemy.url", get_settings().database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -49,12 +49,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option('sqlalchemy.url')
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={'paramstyle': 'named'},
+        dialect_opts={"paramstyle": "named"},
     )
 
     with context.begin_transaction():
@@ -78,7 +78,7 @@ async def run_migrations_online() -> None:
     connectable = AsyncEngine(
         engine_from_config(
             config.get_section(config.config_ini_section),
-            prefix='sqlalchemy.',
+            prefix="sqlalchemy.",
             poolclass=pool.NullPool,
             future=True,
         )

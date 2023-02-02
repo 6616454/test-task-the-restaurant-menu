@@ -11,16 +11,16 @@ class SubMenuRepository(BaseRepository[SubMenu]):
         super().__init__(SubMenu, session)
 
     async def get_by_id_all(self, id_: str) -> SubMenu:
-        query = select(self.model).where(self.model.id == id_).options(
-            joinedload(self.model.dishes)
+        query = (
+            select(self.model)
+            .where(self.model.id == id_)
+            .options(joinedload(self.model.dishes))
         )
         result = (await self.session.execute(query)).scalar()
         return result
 
     async def get_all(self) -> list[SubMenu]:
-        query = select(self.model).options(
-            joinedload(self.model.dishes)
-        )
+        query = select(self.model).options(joinedload(self.model.dishes))
         result = (await self.session.execute(query)).scalars().unique()
         return result
 
@@ -31,9 +31,12 @@ class SubMenuRepository(BaseRepository[SubMenu]):
             return (await self.session.execute(query)).scalars().unique()
         return (await self.session.execute(query)).scalars().all()
 
-    async def get_by_menu_and_id(self, menu_id: str, submenu_id: str, load: bool) -> SubMenu:
+    async def get_by_menu_and_id(
+        self, menu_id: str, submenu_id: str, load: bool
+    ) -> SubMenu:
         query = select(self.model).where(
-            and_(self.model.menu_id == menu_id), self.model.id == submenu_id)
+            and_(self.model.menu_id == menu_id), self.model.id == submenu_id
+        )
         if load:
             query = query.options(joinedload(self.model.dishes))
 

@@ -15,28 +15,24 @@ def build_app() -> FastAPI:
 
     settings = get_settings()
 
-    pool = create_pool(database_url=settings.database_url,
-                       echo_mode=settings.echo_mode)
+    pool = create_pool(database_url=settings.database_url, echo_mode=settings.echo_mode)
 
-    app = FastAPI(
-        title=settings.title,
-        default_response_class=ORJSONResponse
-    )
+    app = FastAPI(title=settings.title, default_response_class=ORJSONResponse)
 
     # setup application
-    setup_di(app=app, pool=pool, redis=create_redis(
-        redis_host=settings.redis_host,
-        redis_port=settings.redis_port,
-        redis_db=settings.redis_db
-    ))
+    setup_di(
+        app=app,
+        pool=pool,
+        redis=create_redis(
+            redis_host=settings.redis_host,
+            redis_port=settings.redis_port,
+            redis_db=settings.redis_db,
+        ),
+    )
     setup_routes(router=app.router)
 
     return app
 
 
-if __name__ == '__main__':
-    uvicorn.run(
-        app='src.api.main:build_app',
-        factory=True,
-        host='0.0.0.0'
-    )
+if __name__ == "__main__":
+    uvicorn.run(app="src.api.main:build_app", factory=True, host="0.0.0.0")
