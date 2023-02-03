@@ -1,7 +1,5 @@
 from pydantic import BaseModel, validator
 
-from src.presentation.api.handlers.responses.exceptions import DishPriceValidationError
-
 
 class CreateRequestMenu(BaseModel):
     title: str
@@ -42,4 +40,4 @@ class UpdateRequestDish(UpdateRequestMenu):
                 return
             return f"{round(float(v), 2):.2f}"
         except ValueError:
-            return {'detail': 'Invalid data'}
+            return {"detail": "Invalid data"}
