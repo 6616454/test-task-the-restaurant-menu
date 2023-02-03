@@ -1,16 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4, ValidationError
 
-from src.presentation.api.di import dish_service_stub, uow_provider
-from src.presentation.api.handlers.requests.menu import CreateRequestDish, UpdateRequestDish
-from src.presentation.api.handlers.responses.exceptions import (
-    DishAlreadyExistsError,
-    DishEmptyRequestBodyError,
-    DishNotFoundError,
-    DishPriceValidationError,
-    SubMenuNotFoundError,
-)
-from src.presentation.api.handlers.responses.menu import DishDeleteResponse
 from src.domain.menu.dto.dish import CreateDish, OutputDish, UpdateDish
 from src.domain.menu.exceptions.dish import (
     DishAlreadyExists,
@@ -20,6 +10,19 @@ from src.domain.menu.exceptions.dish import (
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.usecases.dish import DishService
 from src.infrastructure.db.uow import SQLAlchemyUoW
+from src.presentation.api.di import dish_service_stub, uow_provider
+from src.presentation.api.handlers.requests.menu import (
+    CreateRequestDish,
+    UpdateRequestDish,
+)
+from src.presentation.api.handlers.responses.exceptions import (
+    DishAlreadyExistsError,
+    DishEmptyRequestBodyError,
+    DishNotFoundError,
+    DishPriceValidationError,
+    SubMenuNotFoundError,
+)
+from src.presentation.api.handlers.responses.menu import DishDeleteResponse
 
 router = APIRouter(prefix="/api/v1/menus", tags=["dishes"])
 

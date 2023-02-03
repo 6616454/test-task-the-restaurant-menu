@@ -20,7 +20,7 @@ RUN poetry install --without dev
 
 EXPOSE 8000
 
-CMD alembic upgrade head && python -m src.api.main
+CMD alembic upgrade head && python -m src.presentation.api.main
 
 FROM build_app as test
 

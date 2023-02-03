@@ -1,5 +1,6 @@
-from src.infrastructure.tasks_sender.base import TasksSender
+from src.domain.common.interfaces.tasks_sender import TasksSender
 
 
 class CeleryTasksSender(TasksSender):
-    pass
+    def collect_menu_data(self):
+        pass

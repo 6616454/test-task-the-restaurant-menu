@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+from src.presentation.api.handlers.responses.exceptions import DishPriceValidationError
 
 
 class CreateRequestMenu(BaseModel):
@@ -13,6 +15,13 @@ class CreateRequestSubMenu(CreateRequestMenu):
 class CreateRequestDish(CreateRequestMenu):
     price: str
 
+    @validator("price")
+    def price_validator(cls, v):
+        try:
+            return f"{round(float(v), 2):.2f}"
+        except ValueError:
+            pass
+
 
 class UpdateRequestMenu(BaseModel):
     title: str | None = None
@@ -25,3 +34,12 @@ class UpdateRequestSubMenu(UpdateRequestMenu):
 
 class UpdateRequestDish(UpdateRequestMenu):
     price: str | None = None
+
+    @validator("price")
+    def price_validator(cls, v):
+        try:
+            if v is None:
+                return
+            return f"{round(float(v), 2):.2f}"
+        except ValueError:
+            return {'detail': 'Invalid data'}

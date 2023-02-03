@@ -11,13 +11,13 @@ from redis.asyncio.client import Redis  # type: ignore
 from sqlalchemy import delete, insert, select, text
 from sqlalchemy.orm import close_all_sessions, sessionmaker
 
-from src.presentation.api.di import setup_di
-from src.presentation.api import setup_routes
 from src.core.settings import get_settings
 from src.infrastructure.db.base import create_pool, create_redis
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
+from src.presentation.api.di import setup_di
+from src.presentation.api.handlers import setup_routes
 
 
 def build_test_app() -> FastAPI:

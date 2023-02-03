@@ -2,11 +2,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.presentation.api.di import setup_di
-from src.presentation.api.handlers import setup_routes
 from src.core.logging import setup_logging
 from src.core.settings import get_settings
 from src.infrastructure.db.base import create_pool, create_redis
+from src.presentation.api.di import setup_di
+from src.presentation.api.handlers import setup_routes
 
 
 def build_app() -> FastAPI:
@@ -35,4 +35,4 @@ def build_app() -> FastAPI:
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="src.api.main:build_app", factory=True, host="0.0.0.0")
+    uvicorn.run(app="src.presentation.api.main:build_app", factory=True, host="0.0.0.0")

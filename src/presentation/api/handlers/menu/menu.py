@@ -1,14 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 
-from src.presentation.api.di import menu_service_stub, uow_provider
-from src.presentation.api.handlers.requests.menu import CreateRequestMenu, UpdateRequestMenu
-from src.presentation.api.handlers.responses.exceptions import (
-    MenuAlreadyExistsError,
-    MenuEmptyRequestBodyError,
-    MenuNotFoundError,
-)
-from src.presentation.api.handlers.responses.menu import MenuDeleteResponse
 from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
 from src.domain.menu.exceptions.menu import (
     MenuAlreadyExists,
@@ -17,6 +9,17 @@ from src.domain.menu.exceptions.menu import (
 )
 from src.domain.menu.usecases.menu import MenuService
 from src.infrastructure.db.uow import SQLAlchemyUoW
+from src.presentation.api.di import menu_service_stub, uow_provider
+from src.presentation.api.handlers.requests.menu import (
+    CreateRequestMenu,
+    UpdateRequestMenu,
+)
+from src.presentation.api.handlers.responses.exceptions import (
+    MenuAlreadyExistsError,
+    MenuEmptyRequestBodyError,
+    MenuNotFoundError,
+)
+from src.presentation.api.handlers.responses.menu import MenuDeleteResponse
 
 router = APIRouter(prefix="/api/v1/menus", tags=["menus"])
 

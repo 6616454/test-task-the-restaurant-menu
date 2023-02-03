@@ -1,18 +1,9 @@
-from pydantic import validator
-
 from src.domain.common.dto.base import DTO
 from src.domain.menu.dto.menu import BaseMenu
 
 
 class BaseDish(BaseMenu):
     price: str
-
-    @validator("price")
-    def price_validator(cls, v):
-        if v is None:
-            return
-
-        return f"{round(float(v), 2):.2f}"
 
 
 class OutputDish(DTO):
