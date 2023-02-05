@@ -32,7 +32,7 @@ async def get_len(sub_menus: list[SubMenu], dishes: bool = False) -> int:
 
 
 class GetMenu(MenuUseCase):
-    async def __call__(self, menu_id: str, load: bool) -> OutputMenu | str:
+    async def __call__(self, menu_id: str, load: bool) -> str | OutputMenu:  # type: ignore
         cache = await self.uow.redis_repo.get(menu_id)
         if cache:
             return json.loads(cache)
@@ -43,7 +43,6 @@ class GetMenu(MenuUseCase):
             ).dict()
             await self.uow.redis_repo.put(menu_id, json.dumps(result_menu))
             return result_menu
-        raise MenuNotExists
 
 
 class GetMenus(MenuUseCase):
@@ -144,6 +143,10 @@ class MenuService:
             await PatchMenu(uow)(
                 data.menu_id, data.dict(exclude_none=True, exclude={"menu_id"})
             )
-            return await GetMenu(uow)(data.menu_id, load=True)
+            menu = await GetMenu(uow)(data.menu_id, load=True)
+            if menu:
+                return menu
+
+            raise MenuNotExists
         except ProgrammingError:
             raise MenuDataEmpty

@@ -15,7 +15,7 @@ class MenuRepository(BaseRepository[Menu]):
         query = select(self.model).options(
             joinedload(self.model.submenus).joinedload(SubMenu.dishes)
         )
-        result = (await self.session.execute(query)).unique().scalars()
+        result = (await self.session.execute(query)).unique().scalars().all()
         return result
 
     async def get_by_id_all(self, id_: str, load: bool) -> Menu:

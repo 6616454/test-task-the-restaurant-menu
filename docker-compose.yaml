@@ -44,6 +44,37 @@ services:
         condition: service_healthy
       cache:
         condition: service_started
+      worker:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      custom:
+
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: "rabbitmq"
+    hostname: rabbitmqhost
+    restart: always
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_PORT2}:15672"
+    env_file:
+      .env
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      custom:
+
+  worker:
+    build: .
+    command: celery --app src.presentation.celery.app worker --loglevel=INFO
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       custom:
 

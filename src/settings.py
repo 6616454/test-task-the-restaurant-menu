@@ -7,13 +7,17 @@ class Settings(BaseSettings):
     # APP settings
     title: str = "RestaurantApplication"
 
-    # DB settings
+    # DB(SQL) settings
     database_url: str
     echo_mode: bool = False
 
+    # DB(NoSQL) settings
     redis_host: str
     redis_port: int = 6379
     redis_db: int = 1
+
+    # Broker settings
+    broker_url: str
 
     # Test settings
     database_test_url: str

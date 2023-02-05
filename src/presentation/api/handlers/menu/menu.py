@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 
@@ -124,3 +126,81 @@ async def update_menu(
     except MenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()
+
+
+@router.post("/create_need_data")
+async def create_need_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
+    FirstMenu = uow.menu_holder.menu_repo.model(
+        id=str(uuid.uuid4()), title="Первое меню", description="Описание первого меню"
+    )
+
+    SecondMenu = uow.menu_holder.menu_repo.model(
+        id=str(uuid.uuid4()), title="Второе меню", description="Описание второго меню"
+    )
+
+    await uow.menu_holder.menu_repo.save(FirstMenu)
+    await uow.menu_holder.menu_repo.save(SecondMenu)
+
+    await uow.commit()
+
+    FirstSubMenu = uow.menu_holder.submenu_repo.model(
+        id=str(uuid.uuid4()),
+        title="Первое подменю",
+        description="Описание первого подменю",
+        menu_id=FirstMenu.id,
+    )
+    SecondSubMenu = uow.menu_holder.submenu_repo.model(
+        id=str(uuid.uuid4()),
+        title="Второе подменю",
+        description="Описание второго подменю",
+        menu_id=FirstMenu.id,
+    )
+    ThirdSubMenu = uow.menu_holder.submenu_repo.model(
+        id=str(uuid.uuid4()),
+        title="Третье подменю",
+        description="Описание третьего подменю",
+        menu_id=SecondMenu.id,
+    )
+
+    await uow.menu_holder.submenu_repo.save(FirstSubMenu)
+    await uow.menu_holder.submenu_repo.save(SecondSubMenu)
+    await uow.menu_holder.submenu_repo.save(ThirdSubMenu)
+
+    await uow.commit()
+
+    FirstDish = uow.menu_holder.dish_repo.model(
+        id=str(uuid.uuid4()),
+        title="Название первого блюда",
+        description="Описание первого блюда",
+        price="250.12",
+        submenu_id=FirstSubMenu.id,
+    )
+
+    SecondDish = uow.menu_holder.dish_repo.model(
+        id=str(uuid.uuid4()),
+        title="Название второго блюда",
+        description="Описание второго блюда",
+        price="123.12",
+        submenu_id=FirstSubMenu.id,
+    )
+    ThirdDish = uow.menu_holder.dish_repo.model(
+        id=str(uuid.uuid4()),
+        title="Название третьего блюда",
+        description="Описание третьего блюда",
+        price="250.12",
+        submenu_id=SecondSubMenu.id,
+    )
+    FourthDish = uow.menu_holder.dish_repo.model(
+        id=str(uuid.uuid4()),
+        title="Название четвертого блюда",
+        description="Описание четвертого блюда",
+        price="250.12",
+        submenu_id=ThirdSubMenu.id,
+    )
+
+    await uow.menu_holder.dish_repo.save(FirstDish)
+    await uow.menu_holder.dish_repo.save(SecondDish)
+    await uow.menu_holder.dish_repo.save(ThirdDish)
+    await uow.menu_holder.dish_repo.save(FourthDish)
+
+    await uow.commit()

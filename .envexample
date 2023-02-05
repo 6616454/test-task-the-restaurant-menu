@@ -5,6 +5,9 @@ DATABASE_TEST_URL=postgresql+asyncpg://postgres:postgres@test_db:5432/test_db
 # APP
 APP_PORT=8000
 
+# Celery
+BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+
 
 # DB
 POSTGRES_DB=postgres
@@ -14,6 +17,15 @@ POSTGRES_PASSWORD=postgres
 
 REDIS_HOST=cache
 REDIS_PORT=6379
+
+# BROKER
+RABBITMQ_PORT=5672
+RABBITMQ_PORT2=15672
+
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+
+RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit disk_free_limit 2147483648
 
 # TESTS
 POSTGRES_DB2=test_db
