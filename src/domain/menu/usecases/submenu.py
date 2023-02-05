@@ -94,6 +94,7 @@ class DeleteSubMenu(SubMenuUseCase):
             await self.uow.redis_repo.delete(menu_id)
             await self.uow.redis_repo.delete(f"submenus-{menu_id}")
             await self.uow.redis_repo.delete("menus")
+
             logger.info("Submenu was deleted - %s", submenu_obj.title)
 
             return submenu_obj
@@ -103,6 +104,8 @@ class PatchSubMenu(SubMenuUseCase):
     async def __call__(self, menu_id: str, submenu_id: str, data: dict) -> None:
         await self.uow.menu_holder.submenu_repo.update_obj(submenu_id, **data)
         await self.uow.commit()
+
+        logger.info("Submenu was updated - %s", submenu_id)
 
         await self.uow.redis_repo.delete(submenu_id)
         await self.uow.redis_repo.delete(f"submenus-{menu_id}")
@@ -146,6 +149,8 @@ class SubMenuService:
             if new_submenu:
                 return new_submenu
             raise SubMenuNotExists
+        except IntegrityError:
+            raise SubMenuAlreadyExists
         except ProgrammingError:
             raise SubMenuDataEmpty
 

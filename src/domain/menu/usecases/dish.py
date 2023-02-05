@@ -111,6 +111,8 @@ class PatchDish(DishUseCase):
         await self.uow.menu_holder.dish_repo.update_obj(dish_id, **data)
         await self.uow.commit()
 
+        logger.info("Dish was updated - %s", dish_id)
+
         await self.uow.redis_repo.delete(dish_id)
         await self.uow.redis_repo.delete(f"dishes-{submenu_id}")
 
@@ -168,3 +170,5 @@ class DishService:
             raise DishNotExists
         except ProgrammingError:
             raise DishDataEmpty
+        except IntegrityError:
+            raise DishAlreadyExists

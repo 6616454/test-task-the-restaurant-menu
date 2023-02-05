@@ -69,7 +69,7 @@ async def get_dish(
 @router.post(
     "/{menu_id}/submenus/{submenu_id}/dishes",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": DishAlreadyExistsError},
+        status.HTTP_409_CONFLICT: {"model": DishAlreadyExistsError},
         status.HTTP_404_NOT_FOUND: {"model": SubMenuNotFoundError},
         status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": DishPriceValidationError},
     },
@@ -92,7 +92,7 @@ async def create_dish(
         response.status_code = status.HTTP_404_NOT_FOUND
         return SubMenuNotFoundError()
     except DishAlreadyExists:
-        response.status_code = status.HTTP_400_BAD_REQUEST
+        response.status_code = status.HTTP_409_CONFLICT
         return DishAlreadyExistsError()
     except ValidationError:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -129,6 +129,7 @@ async def delete_dish(
         status.HTTP_404_NOT_FOUND: {"model": DishNotFoundError},
         status.HTTP_400_BAD_REQUEST: {"model": DishEmptyRequestBodyError},
         status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": DishPriceValidationError},
+        status.HTTP_409_CONFLICT: {"model": DishAlreadyExistsError},
     },
 )
 async def update_dish(
@@ -156,6 +157,9 @@ async def update_dish(
     except DishNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return DishNotFoundError()
+    except DishAlreadyExists:
+        response.status_code = status.HTTP_409_CONFLICT
+        return DishAlreadyExistsError()
     except ValidationError:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         return DishPriceValidationError()

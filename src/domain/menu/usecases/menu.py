@@ -101,6 +101,8 @@ class PatchMenu(MenuUseCase):
         await self.uow.menu_holder.menu_repo.update_obj(menu_id, **data)
         await self.uow.commit()
 
+        logger.info("Menus was updated - %s", menu_id)
+
         await self.uow.redis_repo.delete(menu_id)
         await self.uow.redis_repo.delete("menus")
 
@@ -148,5 +150,7 @@ class MenuService:
                 return menu
 
             raise MenuNotExists
+        except IntegrityError:
+            raise MenuAlreadyExists
         except ProgrammingError:
             raise MenuDataEmpty

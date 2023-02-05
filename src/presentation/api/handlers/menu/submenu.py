@@ -127,6 +127,7 @@ async def delete_submenu(
     responses={
         status.HTTP_404_NOT_FOUND: {"model": SubMenuNotFoundError},
         status.HTTP_400_BAD_REQUEST: {"model": SubMenuEmptyRequestBodyError},
+        status.HTTP_409_CONFLICT: {"model": SubMenuAlreadyExistsError},
     },
     summary="Update submenu",
     description="Updating a submenu of a certain menu by ID",
@@ -149,6 +150,9 @@ async def update_submenu(
     except SubMenuDataEmpty:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return SubMenuEmptyRequestBodyError()
+    except SubMenuAlreadyExists:
+        response.status_code = status.HTTP_409_CONFLICT
+        return SubMenuAlreadyExistsError()
     except SubMenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return SubMenuNotFoundError()

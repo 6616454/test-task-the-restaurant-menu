@@ -58,7 +58,7 @@ async def get_menus(
 
 @router.post(
     "/",
-    responses={status.HTTP_400_BAD_REQUEST: {"model": MenuAlreadyExistsError}},
+    responses={status.HTTP_409_CONFLICT: {"model": MenuAlreadyExistsError}},
     status_code=status.HTTP_201_CREATED,
     summary="Create menu",
     description="Creating a new menu",
@@ -70,10 +70,9 @@ async def create_menu(
     menu_service: MenuService = Depends(menu_service_stub),
 ) -> OutputMenu | MenuAlreadyExistsError:
     try:
-        # type: ignore
         return await menu_service.create_menu(uow, CreateMenu(**data.dict()))  # type: ignore
     except MenuAlreadyExists:
-        response.status_code = status.HTTP_400_BAD_REQUEST
+        response.status_code = status.HTTP_409_CONFLICT
         return MenuAlreadyExistsError()
 
 
@@ -105,6 +104,7 @@ async def delete_menu(
     responses={
         status.HTTP_404_NOT_FOUND: {"model": MenuNotFoundError},
         status.HTTP_400_BAD_REQUEST: {"model": MenuEmptyRequestBodyError},
+        status.HTTP_409_CONFLICT: {"model": MenuAlreadyExistsError},
     },
     summary="Update menu",
     description="Updating the menu by ID",
@@ -123,6 +123,9 @@ async def update_menu(
     except MenuDataEmpty:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return MenuEmptyRequestBodyError()
+    except MenuAlreadyExists:
+        response.status_code = status.HTTP_409_CONFLICT
+        return MenuAlreadyExistsError()
     except MenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()

@@ -285,7 +285,6 @@ class TestSubMenuHandlers:
         create_menu_in_database,
         create_submenu_in_database,
         get_submenu_from_database,
-        get_cache,
     ):
         await create_menu_in_database(**menu_data)
         await create_submenu_in_database(**submenu_data)

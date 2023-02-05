@@ -216,7 +216,6 @@ class TestMenuHandlers:
         menu_data,
         create_menu_in_database,
         get_menu_from_database,
-        get_cache,
     ):
         await create_menu_in_database(**menu_data)
 
