@@ -9,7 +9,6 @@ from src.presentation.api.di.providers.services import (
     provide_menu_service,
     provide_submenu_service,
     provide_dish_service,
-    report_service_stub,
     provide_report_service,
 )
 from src.presentation.celery.app import app as celery_app

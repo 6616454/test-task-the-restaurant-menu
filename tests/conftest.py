@@ -15,14 +15,9 @@ from src.infrastructure.db.base import create_pool, create_redis
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
-from src.presentation.api.di import (
-    provide_report_service,
-    report_service_stub,
-    setup_di,
-)
+from src.presentation.api.di import setup_di
 from src.presentation.api.handlers import setup_routes
 from src.settings import get_settings
-from tests.mocks import MockTasksSender
 
 
 def build_test_app() -> FastAPI:
@@ -45,10 +40,6 @@ def build_test_app() -> FastAPI:
         ),
     )
     setup_routes(router=app.router)
-
-    app.dependency_overrides[report_service_stub] = lambda: provide_report_service(
-        tasks_sender=MockTasksSender()  # type: ignore
-    )
 
     return app
 

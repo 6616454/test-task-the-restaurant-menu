@@ -6,10 +6,6 @@ from src.domain.report.usecases.report import ReportService
 from src.infrastructure.db.uow import SQLAlchemyUoW
 
 
-def report_service_stub() -> None:
-    raise NotImplementedError
-
-
 def provide_menu_service(uow: SQLAlchemyUoW) -> MenuService:
     return MenuService(uow=uow)  # type: ignore
 
