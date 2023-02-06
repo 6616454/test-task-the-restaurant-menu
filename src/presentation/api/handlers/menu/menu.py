@@ -36,10 +36,10 @@ router = APIRouter(prefix="/api/v1/menus", tags=["menus"])
     description="Getting the menu by ID",
 )
 async def get_menu(
-    menu_id: UUID4,
-    response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+        menu_id: UUID4,
+        response: Response,
+        uow: SQLAlchemyUoW = Depends(uow_provider),
+        menu_service: MenuService = Depends(menu_service_stub),
 ) -> OutputMenu | MenuNotFoundError:
     try:
         return await menu_service.get_menu(uow, str(menu_id))  # type: ignore
@@ -50,8 +50,8 @@ async def get_menu(
 
 @router.get("/", summary="Get menus", description="Getting the full menu list")
 async def get_menus(
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+        uow: SQLAlchemyUoW = Depends(uow_provider),
+        menu_service: MenuService = Depends(menu_service_stub),
 ) -> list[OutputMenu] | None:
     return await menu_service.get_menus(uow)  # type: ignore
 
@@ -64,10 +64,10 @@ async def get_menus(
     description="Creating a new menu",
 )
 async def create_menu(
-    data: CreateRequestMenu,
-    response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+        data: CreateRequestMenu,
+        response: Response,
+        uow: SQLAlchemyUoW = Depends(uow_provider),
+        menu_service: MenuService = Depends(menu_service_stub),
 ) -> OutputMenu | MenuAlreadyExistsError:
     try:
         return await menu_service.create_menu(uow, CreateMenu(**data.dict()))  # type: ignore
@@ -86,10 +86,10 @@ async def create_menu(
     description="Deleting the menu by ID",
 )
 async def delete_menu(
-    menu_id: UUID4,
-    response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+        menu_id: UUID4,
+        response: Response,
+        uow: SQLAlchemyUoW = Depends(uow_provider),
+        menu_service: MenuService = Depends(menu_service_stub),
 ):
     try:
         await menu_service.delete_menu(uow, str(menu_id))  # type: ignore
@@ -110,11 +110,11 @@ async def delete_menu(
     description="Updating the menu by ID",
 )
 async def update_menu(
-    menu_id: UUID4,
-    update_data: UpdateRequestMenu,
-    response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+        menu_id: UUID4,
+        update_data: UpdateRequestMenu,
+        response: Response,
+        uow: SQLAlchemyUoW = Depends(uow_provider),
+        menu_service: MenuService = Depends(menu_service_stub),
 ) -> OutputMenu | MenuNotFoundError | MenuEmptyRequestBodyError:
     try:
         return await menu_service.update_menu(
@@ -131,8 +131,12 @@ async def update_menu(
         return MenuNotFoundError()
 
 
-@router.post("/create_need_data")
-async def create_need_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
+@router.post(
+    "/create_test_data",
+    summary='Create test data',
+    description='Creating test data for test use application'
+)
+async def create_test_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
     FirstMenu = uow.menu_holder.menu_repo.model(
         id=str(uuid.uuid4()), title="Первое меню", description="Описание первого меню"
     )
