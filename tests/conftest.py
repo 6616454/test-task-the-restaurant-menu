@@ -15,9 +15,10 @@ from src.infrastructure.db.base import create_pool, create_redis
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
-from src.presentation.api.di import setup_di
+from src.presentation.api.di import setup_di, tasks_sender_stub
 from src.presentation.api.handlers import setup_routes
 from src.settings import get_settings
+from tests.mocks import MockTasksSender
 
 
 def build_test_app() -> FastAPI:
@@ -40,6 +41,8 @@ def build_test_app() -> FastAPI:
         ),
     )
     setup_routes(router=app.router)
+
+    app.dependency_overrides[tasks_sender_stub] = MockTasksSender
 
     return app
 
@@ -101,7 +104,7 @@ async def create_menu_in_database(db_session_test: sessionmaker):
 @pytest_asyncio.fixture(scope="function")
 async def create_submenu_in_database(db_session_test: sessionmaker):
     async def create_submenu_in_database(
-        submenu_id: str, title: str, description: str, menu_id: str
+            submenu_id: str, title: str, description: str, menu_id: str
     ):
         async with db_session_test() as session:
             await session.execute(
@@ -117,7 +120,7 @@ async def create_submenu_in_database(db_session_test: sessionmaker):
 @pytest_asyncio.fixture(scope="function")
 async def create_dish_in_database(db_session_test: sessionmaker):
     async def create_dish_in_database(
-        dish_id: str, title: str, description: str, price: str, submenu_id: str
+            dish_id: str, title: str, description: str, price: str, submenu_id: str
     ):
         async with db_session_test() as session:
             await session.execute(
