@@ -34,4 +34,6 @@ def get_dish_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
 
 
 def get_report_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
-    return provide_report_service(uow=uow, tasks_sender=provide_tasks_sender(celery_app=celery_app))
+    return provide_report_service(
+        uow=uow, tasks_sender=provide_tasks_sender(celery_app=celery_app)
+    )
