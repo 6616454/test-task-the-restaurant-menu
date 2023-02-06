@@ -36,7 +36,7 @@ async def get_info_about_task(
 @router.get(
     "/download/{file_name}",
     summary="Download file",
-    description="Endpoint for download binary files"
+    description="Endpoint for download Excel file with menu"
 )
 async def download_report_file(file_name: str):
     return FileResponse(
