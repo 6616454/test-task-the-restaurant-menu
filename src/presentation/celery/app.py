@@ -26,7 +26,9 @@ def build_celery_app() -> Celery:
 def _inject_dependency_to_task(task: Callable, **depends) -> Callable:
     """Special func for inject your own dependencies to task"""
 
-    task_provider = lambda: task(**depends)  # noqa
+    def task_provider():
+        return task(**depends)  # noqa
+
     task_provider.__name__ = task.__name__
     return task_provider
 

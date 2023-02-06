@@ -20,7 +20,8 @@ from src.presentation.celery.app import app as celery_app
 def setup_di(app: FastAPI, pool: sessionmaker, redis: Redis) -> None:
     db_provider = DBProvider(pool, redis)
 
-    tasks_sender = lambda: provide_tasks_sender(celery_app=celery_app)
+    def tasks_sender():
+        return provide_tasks_sender(celery_app=celery_app)
 
     app.dependency_overrides[uow_provider] = db_provider.provide_db
     app.dependency_overrides[menu_service_stub] = lambda: provide_menu_service()

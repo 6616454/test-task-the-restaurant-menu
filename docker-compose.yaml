@@ -66,7 +66,7 @@ services:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
       timeout: 30s
-      retries: 3
+      retries: 10
     networks:
       custom:
 

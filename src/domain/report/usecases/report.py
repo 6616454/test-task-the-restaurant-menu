@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from celery.result import AsyncResult
-from fastapi.responses import JSONResponse
+from fastapi.responses import ORJSONResponse
 
 from src.domain.report.dto.report import ReportDish, ReportMenu, ReportSubMenu
 from src.domain.report.interfaces.tasks_sender import IReportTasksSender
@@ -46,10 +46,10 @@ class ReportService:
     tasks_sender: IReportTasksSender
 
     @staticmethod
-    async def get_info_about_task(task_id: str) -> JSONResponse:
+    async def get_info_about_task(task_id: str) -> ORJSONResponse:
         task = AsyncResult(task_id)
 
-        return JSONResponse(
+        return ORJSONResponse(
             content={
                 "status": task.status,
                 "detail": "Wait when status of task will be SUCCESS.",
@@ -57,12 +57,12 @@ class ReportService:
             }
         )
 
-    async def collect_menu_data(self, uow: IReportUoW) -> JSONResponse:
+    async def collect_menu_data(self, uow: IReportUoW) -> ORJSONResponse:
         report_menus = await GetReportData(uow)()
 
         task_id = self.tasks_sender.collect_menu_data(report_menus)
 
-        return JSONResponse(
+        return ORJSONResponse(
             content={
                 "task_id": task_id,
                 "detail": "Task for get Excel-file for Menu started...",
