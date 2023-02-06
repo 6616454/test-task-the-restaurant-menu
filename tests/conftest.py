@@ -104,7 +104,7 @@ async def create_menu_in_database(db_session_test: sessionmaker):
 @pytest_asyncio.fixture(scope="function")
 async def create_submenu_in_database(db_session_test: sessionmaker):
     async def create_submenu_in_database(
-            submenu_id: str, title: str, description: str, menu_id: str
+        submenu_id: str, title: str, description: str, menu_id: str
     ):
         async with db_session_test() as session:
             await session.execute(
@@ -120,7 +120,7 @@ async def create_submenu_in_database(db_session_test: sessionmaker):
 @pytest_asyncio.fixture(scope="function")
 async def create_dish_in_database(db_session_test: sessionmaker):
     async def create_dish_in_database(
-            dish_id: str, title: str, description: str, price: str, submenu_id: str
+        dish_id: str, title: str, description: str, price: str, submenu_id: str
     ):
         async with db_session_test() as session:
             await session.execute(
