@@ -12,7 +12,7 @@ from src.domain.menu.exceptions.menu import (
 )
 from src.domain.menu.usecases.menu import MenuService
 from src.infrastructure.db.uow import SQLAlchemyUoW
-from src.presentation.api.di import menu_service_stub, uow_provider
+from src.presentation.api.di import get_menu_service, uow_provider
 from src.presentation.api.handlers.requests.menu import (
     CreateRequestMenu,
     UpdateRequestMenu,
@@ -39,11 +39,10 @@ router = APIRouter(prefix="/api/v1/menus", tags=["menus"])
 async def get_menu(
     menu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+    menu_service: MenuService = Depends(get_menu_service),
 ) -> OutputMenu | MenuNotFoundError:
     try:
-        return await menu_service.get_menu(uow, str(menu_id))  # type: ignore
+        return await menu_service.get_menu(str(menu_id))  # type: ignore
     except MenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()
@@ -51,10 +50,9 @@ async def get_menu(
 
 @router.get("/", summary="Get menus", description="Getting the full menu list")
 async def get_menus(
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+    menu_service: MenuService = Depends(get_menu_service),
 ) -> list[OutputMenu] | None:
-    return await menu_service.get_menus(uow)  # type: ignore
+    return await menu_service.get_menus()  # type: ignore
 
 
 @router.post(
@@ -67,11 +65,10 @@ async def get_menus(
 async def create_menu(
     data: CreateRequestMenu,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+    menu_service: MenuService = Depends(get_menu_service),
 ) -> OutputMenu | MenuAlreadyExistsError:
     try:
-        return await menu_service.create_menu(uow, CreateMenu(**data.dict()))  # type: ignore
+        return await menu_service.create_menu(CreateMenu(**data.dict()))
     except MenuAlreadyExists:
         response.status_code = status.HTTP_409_CONFLICT
         return MenuAlreadyExistsError()
@@ -89,11 +86,10 @@ async def create_menu(
 async def delete_menu(
     menu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+    menu_service: MenuService = Depends(get_menu_service),
 ):
     try:
-        await menu_service.delete_menu(uow, str(menu_id))  # type: ignore
+        await menu_service.delete_menu(str(menu_id))
         return MenuDeleteResponse()
     except MenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -114,13 +110,12 @@ async def update_menu(
     menu_id: UUID4,
     update_data: UpdateRequestMenu,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: MenuService = Depends(menu_service_stub),
+    menu_service: MenuService = Depends(get_menu_service),
 ) -> OutputMenu | MenuNotFoundError | MenuEmptyRequestBodyError:
     try:
         return await menu_service.update_menu(
-            uow, UpdateMenu(menu_id=str(menu_id), **update_data.dict())  # type: ignore
-        )
+            UpdateMenu(menu_id=str(menu_id), **update_data.dict())
+        )  # type: ignore
     except MenuDataEmpty:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return MenuEmptyRequestBodyError()

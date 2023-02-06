@@ -1,6 +1,5 @@
 import json
 import logging
-from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -14,7 +13,6 @@ from src.domain.menu.exceptions.submenu import (
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import SubMenuUseCase
 from src.infrastructure.db.models.submenu import SubMenu
-from src.infrastructure.db.uow import SQLAlchemyUoW
 
 logger = logging.getLogger("main_logger")
 
@@ -112,38 +110,37 @@ class PatchSubMenu(SubMenuUseCase):
         await self.uow.redis_repo.delete("menus")
 
 
-@dataclass
 class SubMenuService:
     """Represents business logic for Submenu entity."""
 
-    @staticmethod
-    async def delete_submenu(uow: IMenuUoW, menu_id: str, submenu_id: str) -> None:
-        submenu = await DeleteSubMenu(uow)(menu_id, submenu_id)
+    def __init__(self, uow: IMenuUoW):
+        self.uow = uow
+
+    async def delete_submenu(self, menu_id: str, submenu_id: str) -> None:
+        submenu = await DeleteSubMenu(self.uow)(menu_id, submenu_id)
         if submenu:
             return
 
         raise SubMenuNotExists
 
-    @staticmethod
-    async def create_submenu(uow: IMenuUoW, data: CreateSubMenu) -> OutputSubMenu:
+    async def create_submenu(self, data: CreateSubMenu) -> OutputSubMenu:
         try:
-            if await uow.menu_holder.menu_repo.get_by_id(data.menu_id):
-                return await AddSubMenu(uow)(data)
+            if await self.uow.menu_holder.menu_repo.get_by_id(data.menu_id):
+                return await AddSubMenu(self.uow)(data)
             raise MenuNotExists
         except IntegrityError:
-            await uow.rollback()
+            await self.uow.rollback()
 
             raise SubMenuAlreadyExists
 
-    @staticmethod
-    async def update_submenu(uow: IMenuUoW, data: UpdateSubMenu) -> OutputSubMenu | str:
+    async def update_submenu(self, data: UpdateSubMenu) -> OutputSubMenu | str:
         try:
-            await PatchSubMenu(uow)(
+            await PatchSubMenu(self.uow)(
                 data.menu_id,
                 data.submenu_id,
                 data.dict(exclude_none=True, exclude={"submenu_id", "menu_id"}),
             )
-            new_submenu = await GetSubMenu(uow)(
+            new_submenu = await GetSubMenu(self.uow)(
                 data.menu_id, data.submenu_id, load=True
             )
             if new_submenu:
@@ -154,22 +151,18 @@ class SubMenuService:
         except ProgrammingError:
             raise SubMenuDataEmpty
 
-    @staticmethod
     async def get_submenus(
-        uow: SQLAlchemyUoW | IMenuUoW, menu_id: str
+        self, menu_id: str
     ) -> list[OutputSubMenu] | str | MenuNotExists:
-        submenus = await GetSubMenus(uow)(menu_id)  # type: ignore
+        submenus = await GetSubMenus(self.uow)(menu_id)
 
         if submenus is None and not isinstance(submenus, list):
             raise MenuNotExists
 
         return submenus
 
-    @staticmethod
-    async def get_submenu(
-        uow: IMenuUoW, menu_id: str, submenu_id: str
-    ) -> OutputSubMenu | str:
-        submenu = await GetSubMenu(uow)(menu_id, submenu_id, load=True)
+    async def get_submenu(self, menu_id: str, submenu_id: str) -> OutputSubMenu | str:
+        submenu = await GetSubMenu(self.uow)(menu_id, submenu_id, load=True)
         if submenu:
             return submenu
 

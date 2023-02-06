@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from celery.result import AsyncResult
 from fastapi.responses import ORJSONResponse
 
@@ -41,9 +39,9 @@ class GetReportData(ReportUseCase):
         return result
 
 
-@dataclass
 class ReportService:
-    tasks_sender: IReportTasksSender
+    def __init__(self, tasks_sender: IReportTasksSender):
+        self.tasks_sender = tasks_sender
 
     @staticmethod
     async def get_info_about_task(task_id: str) -> ORJSONResponse:

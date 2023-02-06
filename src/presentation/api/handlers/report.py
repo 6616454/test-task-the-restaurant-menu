@@ -42,5 +42,5 @@ async def download_report_file(file_name: str) -> FileResponse:
     return FileResponse(
         path=f"data/{file_name}",
         filename=file_name,
-        media_type="application/octet-stream",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

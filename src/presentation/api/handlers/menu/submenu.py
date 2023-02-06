@@ -9,9 +9,7 @@ from src.domain.menu.exceptions.submenu import (
     SubMenuNotExists,
 )
 from src.domain.menu.usecases.submenu import SubMenuService
-from src.infrastructure.db.uow import SQLAlchemyUoW
-from src.presentation.api.di import uow_provider
-from src.presentation.api.di.providers.services import submenu_service_stub
+from src.presentation.api.di import get_submenu_service
 from src.presentation.api.handlers.requests.menu import (
     CreateRequestSubMenu,
     UpdateRequestSubMenu,
@@ -39,11 +37,10 @@ router = APIRouter(prefix="/api/v1/menus", tags=["submenus"])
 async def get_submenus(
     menu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    submenu_service: SubMenuService = Depends(submenu_service_stub),
-) -> list[OutputSubMenu] | MenuNotFoundError | None:  # type: ignore
+    submenu_service: SubMenuService = Depends(get_submenu_service),
+) -> list[OutputSubMenu] | MenuNotFoundError | None:
     try:
-        return await submenu_service.get_submenus(uow, str(menu_id))  # type: ignore
+        return await submenu_service.get_submenus(str(menu_id))  # type: ignore
     except MenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return MenuNotFoundError()
@@ -59,11 +56,10 @@ async def get_submenu(
     menu_id: UUID4,
     submenu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: SubMenuService = Depends(submenu_service_stub),
+    menu_service: SubMenuService = Depends(get_submenu_service),
 ) -> OutputSubMenu | SubMenuNotFoundError:
     try:
-        return await menu_service.get_submenu(uow, str(menu_id), str(submenu_id))  # type: ignore
+        return await menu_service.get_submenu(str(menu_id), str(submenu_id))  # type: ignore
     except SubMenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return SubMenuNotFoundError()
@@ -83,12 +79,11 @@ async def create_submenu(
     data: CreateRequestSubMenu,
     menu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    menu_service: SubMenuService = Depends(submenu_service_stub),
+    menu_service: SubMenuService = Depends(get_submenu_service),
 ) -> OutputSubMenu | SubMenuAlreadyExistsError | MenuNotFoundError:
     try:
         return await menu_service.create_submenu(
-            uow, CreateSubMenu(menu_id=str(menu_id), **data.dict())  # type: ignore
+            CreateSubMenu(menu_id=str(menu_id), **data.dict())
         )
     except SubMenuAlreadyExists:
         response.status_code = status.HTTP_400_BAD_REQUEST
@@ -111,11 +106,10 @@ async def delete_submenu(
     submenu_id: UUID4,
     menu_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    submenu_service: SubMenuService = Depends(submenu_service_stub),
+    submenu_service: SubMenuService = Depends(get_submenu_service),
 ):
     try:
-        await submenu_service.delete_submenu(uow, str(menu_id), str(submenu_id))  # type: ignore
+        await submenu_service.delete_submenu(str(menu_id), str(submenu_id))
         return SubMenuDeleteResponse()
     except SubMenuNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -137,15 +131,13 @@ async def update_submenu(
     submenu_id: UUID4,
     update_data: UpdateRequestSubMenu,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    submenu_service: SubMenuService = Depends(submenu_service_stub),
+    submenu_service: SubMenuService = Depends(get_submenu_service),
 ) -> OutputSubMenu | SubMenuNotFoundError | SubMenuEmptyRequestBodyError:
     try:
         return await submenu_service.update_submenu(
-            uow,  # type: ignore
             UpdateSubMenu(
                 menu_id=str(menu_id), submenu_id=str(submenu_id), **update_data.dict()
-            ),
+            )  # type: ignore
         )
     except SubMenuDataEmpty:
         response.status_code = status.HTTP_400_BAD_REQUEST

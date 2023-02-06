@@ -1,6 +1,5 @@
 import json
 import logging
-from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -107,45 +106,42 @@ class PatchMenu(MenuUseCase):
         await self.uow.redis_repo.delete("menus")
 
 
-@dataclass
 class MenuService:
     """Represents business logic for Menu entity."""
 
-    @staticmethod
-    async def create_menu(uow: IMenuUoW, data: CreateMenu) -> OutputMenu:
+    def __init__(self, uow: IMenuUoW):
+        self.uow = uow
+
+    async def create_menu(self, data: CreateMenu) -> OutputMenu:
         try:
-            return await AddMenu(uow)(data)
+            return await AddMenu(self.uow)(data)
         except IntegrityError:
-            await uow.rollback()
+            await self.uow.rollback()
         raise MenuAlreadyExists
 
-    @staticmethod
-    async def get_menus(uow: IMenuUoW) -> list[OutputMenu] | str | None:
-        return await GetMenus(uow)()
+    async def get_menus(self) -> list[OutputMenu] | str | None:
+        return await GetMenus(self.uow)()
 
-    @staticmethod
-    async def get_menu(uow: IMenuUoW, menu_id: str) -> OutputMenu | str | MenuNotExists:
-        menu = await GetMenu(uow)(menu_id, load=True)
+    async def get_menu(self, menu_id: str) -> OutputMenu | str | MenuNotExists:
+        menu = await GetMenu(self.uow)(menu_id, load=True)
         if menu:
             return menu
         raise MenuNotExists
 
-    @staticmethod
-    async def delete_menu(uow: IMenuUoW, menu_id: str) -> None:
-        menu = await DeleteMenu(uow)(menu_id)
+    async def delete_menu(self, menu_id: str) -> None:
+        menu = await DeleteMenu(self.uow)(menu_id)
         if menu:
             return
         raise MenuNotExists
 
-    @staticmethod
     async def update_menu(
-        uow: IMenuUoW, data: UpdateMenu
+        self, data: UpdateMenu
     ) -> OutputMenu | str | MenuNotExists | MenuDataEmpty:
         try:
-            await PatchMenu(uow)(
+            await PatchMenu(self.uow)(
                 data.menu_id, data.dict(exclude_none=True, exclude={"menu_id"})
             )
-            menu = await GetMenu(uow)(data.menu_id, load=True)
+            menu = await GetMenu(self.uow)(data.menu_id, load=True)
             if menu:
                 return menu
 

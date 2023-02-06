@@ -9,8 +9,7 @@ from src.domain.menu.exceptions.dish import (
 )
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.usecases.dish import DishService
-from src.infrastructure.db.uow import SQLAlchemyUoW
-from src.presentation.api.di import dish_service_stub, uow_provider
+from src.presentation.api.di import get_dish_service
 from src.presentation.api.handlers.requests.menu import (
     CreateRequestDish,
     UpdateRequestDish,
@@ -37,11 +36,10 @@ router = APIRouter(prefix="/api/v1/menus", tags=["dishes"])
 async def get_dishes(
     menu_id: UUID4,
     submenu_id: UUID4,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    dish_service: DishService = Depends(dish_service_stub),
+    dish_service: DishService = Depends(get_dish_service),
 ) -> list[OutputDish]:  # , SubMenuNotFoundError]
     # try:
-    return await dish_service.get_dishes(uow, str(menu_id), str(submenu_id))  # type: ignore
+    return await dish_service.get_dishes(str(menu_id), str(submenu_id))
     # except SubMenuNotExists:
     #     response.status_code = status.HTTP_404_NOT_FOUND
     #     return SubMenuNotFoundError()
@@ -56,11 +54,10 @@ async def get_dish(
     submenu_id: UUID4,
     dish_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    dish_service: DishService = Depends(dish_service_stub),
+    dish_service: DishService = Depends(get_dish_service),
 ) -> OutputDish | DishNotFoundError:
     try:
-        return await dish_service.get_dish(uow, str(submenu_id), str(dish_id))  # type: ignore
+        return await dish_service.get_dish(str(submenu_id), str(dish_id))
     except DishNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
         return DishNotFoundError()
@@ -80,12 +77,10 @@ async def create_dish(
     submenu_id: UUID4,
     response: Response,
     data: CreateRequestDish,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    dish_service: DishService = Depends(dish_service_stub),
+    dish_service: DishService = Depends(get_dish_service),
 ) -> OutputDish | SubMenuNotFoundError | DishAlreadyExistsError | DishPriceValidationError:
     try:
         return await dish_service.create_dish(
-            uow,  # type: ignore
             CreateDish(menu_id=str(menu_id), submenu_id=str(submenu_id), **data.dict()),
         )
     except SubMenuNotExists:
@@ -111,12 +106,10 @@ async def delete_dish(
     submenu_id: UUID4,
     dish_id: UUID4,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    dish_service: DishService = Depends(dish_service_stub),
+    dish_service: DishService = Depends(get_dish_service),
 ):
     try:
-        # type: ignore
-        await dish_service.delete_dish(uow, str(menu_id), str(submenu_id), str(dish_id))  # type: ignore
+        await dish_service.delete_dish(str(menu_id), str(submenu_id), str(dish_id))
         return DishDeleteResponse()
     except DishNotExists:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -138,12 +131,10 @@ async def update_dish(
     dish_id: UUID4,
     update_data: UpdateRequestDish,
     response: Response,
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    dish_service: DishService = Depends(dish_service_stub),
+    dish_service: DishService = Depends(get_dish_service),
 ) -> OutputDish | DishNotFoundError | DishEmptyRequestBodyError | DishPriceValidationError:
     try:
         return await dish_service.update_dish(
-            uow,  # type: ignore
             UpdateDish(
                 menu_id=str(menu_id),
                 submenu_id=str(submenu_id),

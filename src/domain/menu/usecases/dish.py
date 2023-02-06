@@ -1,6 +1,5 @@
 import json
 import logging
-from dataclasses import dataclass
 
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
@@ -117,54 +116,47 @@ class PatchDish(DishUseCase):
         await self.uow.redis_repo.delete(f"dishes-{submenu_id}")
 
 
-@dataclass
 class DishService:
-    """Represents business logic for Dish entity."""
+    def __init__(self, uow: IMenuUoW):
+        self.uow = uow
 
-    @staticmethod
-    async def get_dishes(uow: IMenuUoW, menu_id: str, submenu_id: str) -> list[Dish]:
-        return await GetDishes(uow)(menu_id, submenu_id)
+    async def get_dishes(self, menu_id: str, submenu_id: str) -> list[Dish]:
+        return await GetDishes(self.uow)(menu_id, submenu_id)
 
-    @staticmethod
-    async def get_dish(uow: IMenuUoW, submenu_id: str, dish_id: str) -> Dish:
-        dish = await GetDish(uow)(submenu_id, dish_id)
+    async def get_dish(self, submenu_id: str, dish_id: str) -> Dish:
+        dish = await GetDish(self.uow)(submenu_id, dish_id)
         if dish:
             return dish
 
         raise DishNotExists
 
-    @staticmethod
-    async def create_dish(uow: IMenuUoW, data: CreateDish) -> Dish:
+    async def create_dish(self, data: CreateDish) -> Dish:
         try:
-            if await uow.menu_holder.submenu_repo.get_by_menu_id(
+            if await self.uow.menu_holder.submenu_repo.get_by_menu_id(
                 data.menu_id, load=False
             ):
-                return await AddDish(uow)(data)
+                return await AddDish(self.uow)(data)
             raise SubMenuNotExists
         except IntegrityError:
             raise DishAlreadyExists
 
-    @staticmethod
-    async def delete_dish(
-        uow: IMenuUoW, menu_id: str, submenu_id: str, dish_id: str
-    ) -> None:
-        dish = await DeleteDish(uow)(menu_id, submenu_id, dish_id)
+    async def delete_dish(self, menu_id: str, submenu_id: str, dish_id: str) -> None:
+        dish = await DeleteDish(self.uow)(menu_id, submenu_id, dish_id)
         if dish:
             return
 
         raise DishNotExists
 
-    @staticmethod
-    async def update_dish(uow: IMenuUoW, data: UpdateDish) -> Dish:
+    async def update_dish(self, data: UpdateDish) -> Dish:
         try:
-            await PatchDish(uow)(
+            await PatchDish(self.uow)(
                 data.submenu_id,
                 data.dish_id,
                 data.dict(
                     exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}
                 ),
             )
-            updated_obj = await GetDish(uow)(data.submenu_id, data.dish_id)
+            updated_obj = await GetDish(self.uow)(data.submenu_id, data.dish_id)
             if updated_obj:
                 return updated_obj
             raise DishNotExists
