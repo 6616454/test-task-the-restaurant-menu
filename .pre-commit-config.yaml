@@ -25,6 +25,12 @@ repos:
       - id: pyupgrade
         args: [ --py310-plus ]
 
+  # Форматирует код под PEP8
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.1
+    hooks:
+      - id: autopep8
+        args: [ "-i", "--in-place", "--max-line-length=120" ]
   # Сканер стилистических ошибок, нарушающие договоренности PEP8
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
