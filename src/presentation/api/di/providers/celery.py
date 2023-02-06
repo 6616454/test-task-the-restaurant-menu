@@ -3,7 +3,7 @@ from celery import Celery
 from src.infrastructure.tasks_sender.celery.celery import CeleryTasksSender
 
 
-def tasks_sender_stub() -> None:
+def tasks_sender_provider() -> None:
     raise NotImplementedError
 
 

@@ -6,7 +6,7 @@ from src.domain.common.interfaces.tasks_sender import TasksSender
 from src.infrastructure.db.uow import SQLAlchemyUoW
 from src.presentation.api.di.providers.celery import (
     provide_tasks_sender,
-    tasks_sender_stub,
+    tasks_sender_provider,
 )
 from src.presentation.api.di.providers.db import DBProvider, uow_provider
 from src.presentation.api.di.providers.services import (
@@ -21,7 +21,7 @@ from src.presentation.celery.app import app as celery_app
 def setup_di(app: FastAPI, pool: sessionmaker, redis: Redis) -> None:
     db_provider = DBProvider(pool, redis)
 
-    app.dependency_overrides[tasks_sender_stub] = lambda: provide_tasks_sender(
+    app.dependency_overrides[tasks_sender_provider] = lambda: provide_tasks_sender(
         celery_app=celery_app
     )
     app.dependency_overrides[uow_provider] = db_provider.provide_db
@@ -41,6 +41,6 @@ def get_dish_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
 
 def get_report_service(
     uow: SQLAlchemyUoW = Depends(uow_provider),
-    tasks_sender: TasksSender = Depends(tasks_sender_stub),
+    tasks_sender: TasksSender = Depends(tasks_sender_provider),
 ):
     return provide_report_service(uow=uow, tasks_sender=tasks_sender)
