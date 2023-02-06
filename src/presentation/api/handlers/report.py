@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import FileResponse
 
 from src.domain.report.usecases.report import ReportService
-from src.infrastructure.db.uow import SQLAlchemyUoW
-from src.presentation.api.di import uow_provider
-from src.presentation.api.di.providers.services import report_service_stub
+from src.presentation.api.di import get_report_service
 
 router = APIRouter(prefix="/api/v1/report", tags=["report"])
 
@@ -16,10 +14,9 @@ router = APIRouter(prefix="/api/v1/report", tags=["report"])
     description="Create background task for generate excel file with Menu.",
 )
 async def create_report(
-    uow: SQLAlchemyUoW = Depends(uow_provider),
-    report_service: ReportService = Depends(report_service_stub),
+    report_service: ReportService = Depends(get_report_service),
 ) -> str:
-    return await report_service.collect_menu_data(uow)
+    return await report_service.collect_menu_data()
 
 
 @router.get(
@@ -28,7 +25,7 @@ async def create_report(
     description="Get info about background task by task id",
 )
 async def get_info_about_task(
-    task_id: str, report_service: ReportService = Depends(report_service_stub)
+    task_id: str, report_service: ReportService = Depends(get_report_service)
 ):
     return await report_service.get_info_about_task(task_id)
 

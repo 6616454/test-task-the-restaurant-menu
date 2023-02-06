@@ -40,8 +40,9 @@ class GetReportData(ReportUseCase):
 
 
 class ReportService:
-    def __init__(self, tasks_sender: IReportTasksSender):
+    def __init__(self, tasks_sender: IReportTasksSender, uow: IReportUoW):
         self.tasks_sender = tasks_sender
+        self.uow = uow
 
     @staticmethod
     async def get_info_about_task(task_id: str) -> ORJSONResponse:
@@ -55,8 +56,8 @@ class ReportService:
             }
         )
 
-    async def collect_menu_data(self, uow: IReportUoW) -> ORJSONResponse:
-        report_menus = await GetReportData(uow)()
+    async def collect_menu_data(self) -> ORJSONResponse:
+        report_menus = await GetReportData(self.uow)()
 
         task_id = self.tasks_sender.collect_menu_data(report_menus)
 

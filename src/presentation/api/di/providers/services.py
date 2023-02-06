@@ -22,5 +22,5 @@ def provide_dish_service(uow: SQLAlchemyUoW) -> DishService:
     return DishService(uow=uow)  # type: ignore
 
 
-def provide_report_service(tasks_sender: TasksSender) -> ReportService:
-    return ReportService(tasks_sender)
+def provide_report_service(uow: SQLAlchemyUoW, tasks_sender: TasksSender) -> ReportService:
+    return ReportService(uow=uow, tasks_sender=tasks_sender)

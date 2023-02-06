@@ -19,18 +19,19 @@ def setup_di(app: FastAPI, pool: sessionmaker, redis: Redis) -> None:
     db_provider = DBProvider(pool, redis)
 
     app.dependency_overrides[uow_provider] = db_provider.provide_db
-    app.dependency_overrides[report_service_stub] = lambda: provide_report_service(
-        tasks_sender=provide_tasks_sender(celery_app=celery_app)
-    )
 
 
 def get_menu_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
-    return provide_menu_service(uow)
+    return provide_menu_service(uow=uow)
 
 
 def get_submenu_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
-    return provide_submenu_service(uow)
+    return provide_submenu_service(uow=uow)
 
 
 def get_dish_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
-    return provide_dish_service(uow)
+    return provide_dish_service(uow=uow)
+
+
+def get_report_service(uow: SQLAlchemyUoW = Depends(uow_provider)):
+    return provide_report_service(uow=uow, tasks_sender=provide_tasks_sender(celery_app=celery_app))
