@@ -17,4 +17,5 @@ class CeleryTasksSender(TasksSender):
         new_task = self.celery.send_task(
             "src.presentation.celery.tasks.collect_menu_data", args=(report_menus,)
         )
+
         return new_task.id

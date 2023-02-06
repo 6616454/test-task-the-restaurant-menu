@@ -65,6 +65,6 @@ class ReportService:
         return JSONResponse(
             content={
                 "task_id": task_id,
-                "detail": "Task for get Excel-file with Menu started...",
+                "detail": "Task for get Excel-file for Menu started...",
             }
         )

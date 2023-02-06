@@ -14,6 +14,7 @@ def build_celery_app() -> Celery:
     logger.info("Celery app creating...")
 
     settings = get_settings()
+
     celery_app = Celery(main="name", broker=settings.broker_url, backend="rpc://")
 
     # Inject tasks to app
