@@ -42,7 +42,7 @@ def build_test_app() -> FastAPI:
     )
     setup_routes(router=app.router)
 
-    app.dependency_overrides[tasks_sender_provider] = MockTasksSender
+    app.dependency_overrides[tasks_sender_provider] = lambda: MockTasksSender()
 
     return app
 
