@@ -1,6 +1,7 @@
 import logging
 
 from celery import Celery
+from celery.backends.database import Task
 
 from src.domain.common.interfaces.tasks_sender import TasksSender
 
@@ -19,3 +20,6 @@ class CeleryTasksSender(TasksSender):
         )
 
         return new_task.id
+
+    def get_info_by_task_id(self, task_id: str) -> Task:
+        return self.celery.AsyncResult(task_id)

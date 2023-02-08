@@ -1,5 +1,3 @@
-from celery.result import AsyncResult
-
 from src.domain.report.dto.report import (
     ReportDish,
     ReportMenu,
@@ -49,9 +47,8 @@ class ReportService:
         self.tasks_sender = tasks_sender
         self.uow = uow
 
-    @staticmethod
-    async def get_info_about_task(task_id: str) -> ReportStatusTask:
-        task = AsyncResult(task_id)
+    async def get_info_about_task(self, task_id: str) -> ReportStatusTask:
+        task = self.tasks_sender.get_info_by_task_id(task_id)
 
         return ReportStatusTask(status=task.status, link=task.result)
 
