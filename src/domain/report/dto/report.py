@@ -17,3 +17,8 @@ class ReportMenu(DTO):
     title: str
     description: str
     submenus: list[ReportSubMenu]
+
+
+class ReportStatusTask(DTO):
+    status: str
+    link: str | None = None

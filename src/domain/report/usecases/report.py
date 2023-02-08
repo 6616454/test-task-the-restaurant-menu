@@ -1,7 +1,12 @@
 from celery.result import AsyncResult
-from fastapi.responses import ORJSONResponse
 
-from src.domain.report.dto.report import ReportDish, ReportMenu, ReportSubMenu
+from src.domain.report.dto.report import (
+    ReportDish,
+    ReportMenu,
+    ReportStatusTask,
+    ReportSubMenu,
+)
+from src.domain.report.exceptions.report import ReportDataEmpty
 from src.domain.report.interfaces.tasks_sender import IReportTasksSender
 from src.domain.report.interfaces.uow import IReportUoW
 from src.domain.report.interfaces.usecases import ReportUseCase
@@ -45,25 +50,17 @@ class ReportService:
         self.uow = uow
 
     @staticmethod
-    async def get_info_about_task(task_id: str) -> ORJSONResponse:
+    async def get_info_about_task(task_id: str) -> ReportStatusTask:
         task = AsyncResult(task_id)
 
-        return ORJSONResponse(
-            content={
-                "status": task.status,
-                "detail": "Wait when status of task will be SUCCESS.",
-                "link": f"Link for download Excel-file with Menu - {task.result}",
-            }
-        )
+        return ReportStatusTask(status=task.status, link=task.result)
 
-    async def collect_menu_data(self) -> ORJSONResponse:
+    async def collect_menu_data(self) -> str:
         report_menus = await GetReportData(self.uow)()
 
-        task_id = self.tasks_sender.collect_menu_data(report_menus)
+        if report_menus:
+            task_id = self.tasks_sender.collect_menu_data(report_menus)
 
-        return ORJSONResponse(
-            content={
-                "task_id": task_id,
-                "detail": "Task for get Excel-file for Menu started...",
-            }
-        )
+            return task_id
+
+        raise ReportDataEmpty

@@ -17,7 +17,7 @@ from src.presentation.api.handlers.requests.menu import (
     CreateRequestMenu,
     UpdateRequestMenu,
 )
-from src.presentation.api.handlers.responses.exceptions import (
+from src.presentation.api.handlers.responses.exceptions.menu import (
     MenuAlreadyExistsError,
     MenuEmptyRequestBodyError,
     MenuNotFoundError,

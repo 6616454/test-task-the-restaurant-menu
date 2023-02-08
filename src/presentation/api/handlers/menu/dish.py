@@ -14,7 +14,7 @@ from src.presentation.api.handlers.requests.menu import (
     CreateRequestDish,
     UpdateRequestDish,
 )
-from src.presentation.api.handlers.responses.exceptions import (
+from src.presentation.api.handlers.responses.exceptions.menu import (
     DishAlreadyExistsError,
     DishEmptyRequestBodyError,
     DishNotFoundError,
