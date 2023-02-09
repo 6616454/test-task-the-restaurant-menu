@@ -1,4 +1,3 @@
-from redis.asyncio.client import Redis  # type: ignore
 from sqlalchemy.orm import sessionmaker
 
 from src.infrastructure.db.uow import SQLAlchemyUoW

@@ -42,9 +42,7 @@ class GetDishes(DishUseCase):
         if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
             dishes = await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
             output_dishes = [dish.to_dto().dict() for dish in dishes]
-            await self.cache.put(
-                f"dishes-{submenu_id}", json.dumps(output_dishes)
-            )
+            await self.cache.put(f"dishes-{submenu_id}", json.dumps(output_dishes))
 
             return output_dishes
 
@@ -81,9 +79,7 @@ class AddDish(DishUseCase):
 
         await clean_cache(self.cache, data.menu_id, data.submenu_id)
 
-        await self.cache.put(
-            str(new_dish.id), json.dumps(new_dish.to_dto().dict())
-        )
+        await self.cache.put(str(new_dish.id), json.dumps(new_dish.to_dto().dict()))
 
         logger.info("Created new dish - %s", data.title)
 
@@ -157,7 +153,9 @@ class DishService:
                     exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}
                 ),
             )
-            updated_obj = await GetDish(self.uow, self.cache)(data.submenu_id, data.dish_id)
+            updated_obj = await GetDish(self.uow, self.cache)(
+                data.submenu_id, data.dish_id
+            )
             if updated_obj:
                 return updated_obj
             raise DishNotExists

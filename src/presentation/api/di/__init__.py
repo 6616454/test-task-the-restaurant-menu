@@ -32,22 +32,25 @@ def setup_di(app: FastAPI, pool: sessionmaker, redis: Redis) -> None:
 
 
 def get_menu_service(
-        uow: SQLAlchemyUoW = Depends(uow_provider),
-        cache: ICache = Depends(redis_provider)
+    uow: SQLAlchemyUoW = Depends(uow_provider), cache: ICache = Depends(redis_provider)
 ):
     return provide_menu_service(uow=uow, cache=cache)
 
 
-def get_submenu_service(uow: SQLAlchemyUoW = Depends(uow_provider), cache: ICache = Depends(redis_provider)):
+def get_submenu_service(
+    uow: SQLAlchemyUoW = Depends(uow_provider), cache: ICache = Depends(redis_provider)
+):
     return provide_submenu_service(uow=uow, cache=cache)
 
 
-def get_dish_service(uow: SQLAlchemyUoW = Depends(uow_provider), cache: ICache = Depends(redis_provider)):
+def get_dish_service(
+    uow: SQLAlchemyUoW = Depends(uow_provider), cache: ICache = Depends(redis_provider)
+):
     return provide_dish_service(uow=uow, cache=cache)
 
 
 def get_report_service(
-        uow: SQLAlchemyUoW = Depends(uow_provider),
-        tasks_sender: TasksSender = Depends(tasks_sender_provider),
+    uow: SQLAlchemyUoW = Depends(uow_provider),
+    tasks_sender: TasksSender = Depends(tasks_sender_provider),
 ):
     return provide_report_service(uow=uow, tasks_sender=tasks_sender)

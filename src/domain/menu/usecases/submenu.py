@@ -49,9 +49,7 @@ class GetSubMenus(SubMenuUseCase):
                 output_submenus = [
                     submenu.to_dto(len(submenu.dishes)).dict() for submenu in submenus
                 ]
-                await self.cache.put(
-                    f"submenus-{menu_id}", json.dumps(output_submenus)
-                )
+                await self.cache.put(f"submenus-{menu_id}", json.dumps(output_submenus))
                 return output_submenus
 
             return submenus
@@ -71,9 +69,7 @@ class AddSubMenu(SubMenuUseCase):
         await self.cache.delete(data.menu_id)
         await self.cache.delete("menus")
 
-        await self.cache.put(
-            str(submenu.id), json.dumps(submenu.to_dto().dict())
-        )
+        await self.cache.put(str(submenu.id), json.dumps(submenu.to_dto().dict()))
 
         logger.info("New submenu - %s", data.title)
 

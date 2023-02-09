@@ -1,4 +1,4 @@
-from redis.asyncio.client import Redis
+from redis.asyncio.client import Redis  # type: ignore
 
 from src.infrastructure.db.repositories.redis.base import RedisRepository
 
