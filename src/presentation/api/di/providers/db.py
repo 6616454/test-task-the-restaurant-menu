@@ -9,10 +9,9 @@ def uow_provider() -> None:
 
 
 class DBProvider:
-    def __init__(self, pool: sessionmaker, redis: Redis):
+    def __init__(self, pool: sessionmaker):
         self.pool = pool
-        self.redis = redis
 
     async def provide_db(self):
         async with self.pool() as session:
-            yield SQLAlchemyUoW(session, self.redis)
+            yield SQLAlchemyUoW(session)
