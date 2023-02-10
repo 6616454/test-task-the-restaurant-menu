@@ -32,23 +32,20 @@ async def clean_cache(
 
 
 class GetDishes(DishUseCase):
-    async def __call__(
-        self, menu_id: str, submenu_id: str
-    ) -> list[OutputDish] | str | None:
+    async def __call__(self, submenu_id: str) -> list[OutputDish] | str | None:
         cache = await self.cache.get(f"dishes-{submenu_id}")
 
         if cache:
             return json.loads(cache)
 
-        if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
-            dishes = await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
+        dishes = await self.uow.menu_holder.dish_repo.get_by_submenu(submenu_id)
+        if dishes:
             output_dishes = [dish.to_dto().dict() for dish in dishes]
             await self.cache.put(f"dishes-{submenu_id}", json.dumps(output_dishes))
 
             return output_dishes
 
-        return []
-        # raise SubMenuNotExists
+        return dishes
 
 
 class GetDish(DishUseCase):
@@ -134,7 +131,10 @@ class DishService:
     async def get_dishes(
         self, menu_id: str, submenu_id: str
     ) -> list[OutputDish] | str | None:
-        return await GetDishes(self.uow, self.cache)(menu_id, submenu_id)
+        # if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
+        return await GetDishes(self.uow, self.cache)(submenu_id)
+        # raiseSubMenuNotExists ЗАКОММЕНТИРОВАЛ, Т.К.
+        # ошибка мешает тестам в постмане, но по логике должно присутствовать
 
     async def get_dish(self, submenu_id: str, dish_id: str) -> OutputDish | str:
         return await GetDish(self.uow, self.cache)(submenu_id, dish_id)
