@@ -37,7 +37,7 @@ async def get_dishes(
     menu_id: UUID4,
     submenu_id: UUID4,
     dish_service: DishService = Depends(get_dish_service),
-) -> list[OutputDish]:  # , SubMenuNotFoundError]
+) -> list[OutputDish] | str | None:  # , SubMenuNotFoundError]
     # try:
     return await dish_service.get_dishes(str(menu_id), str(submenu_id))
     # except SubMenuNotExists:
@@ -55,7 +55,7 @@ async def get_dish(
     dish_id: UUID4,
     response: Response,
     dish_service: DishService = Depends(get_dish_service),
-) -> OutputDish | DishNotFoundError:
+) -> OutputDish | str | DishNotFoundError:
     try:
         return await dish_service.get_dish(str(submenu_id), str(dish_id))
     except DishNotExists:
@@ -132,7 +132,7 @@ async def update_dish(
     update_data: UpdateRequestDish,
     response: Response,
     dish_service: DishService = Depends(get_dish_service),
-) -> OutputDish | DishNotFoundError | DishEmptyRequestBodyError | DishPriceValidationError:
+) -> OutputDish | str | DishNotFoundError | DishEmptyRequestBodyError | DishPriceValidationError:
     try:
         return await dish_service.update_dish(
             UpdateDish(
