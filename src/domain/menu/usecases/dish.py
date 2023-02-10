@@ -13,14 +13,13 @@ from src.domain.menu.exceptions.dish import (
 from src.domain.menu.exceptions.submenu import SubMenuNotExists
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import DishUseCase
-from src.infrastructure.db.models.dish import Dish
 
 logger = logging.getLogger("main_logger")
 
 
 async def clean_cache(
     cache: ICache, menu_id: str, submenu_id: str, dish_id: str | None = None
-):
+) -> None:
     await cache.delete("menus")
     await cache.delete("submenus")
     await cache.delete(f"submenus-{menu_id}")
@@ -33,7 +32,9 @@ async def clean_cache(
 
 
 class GetDishes(DishUseCase):
-    async def __call__(self, menu_id: str, submenu_id: str):
+    async def __call__(
+        self, menu_id: str, submenu_id: str
+    ) -> list[OutputDish] | str | None:
         cache = await self.cache.get(f"dishes-{submenu_id}")
 
         if cache:
@@ -51,7 +52,7 @@ class GetDishes(DishUseCase):
 
 
 class GetDish(DishUseCase):
-    async def __call__(self, submenu_id: str, dish_id: str):
+    async def __call__(self, submenu_id: str, dish_id: str) -> OutputDish | str:
         cache = await self.cache.get(dish_id)
         if cache:
             return json.loads(cache)
@@ -62,6 +63,8 @@ class GetDish(DishUseCase):
         if dish:
             await self.cache.put(dish_id, json.dumps(dish.to_dto().dict()))
             return dish.to_dto()
+
+        raise DishNotExists
 
 
 class AddDish(DishUseCase):
@@ -91,7 +94,7 @@ class AddDish(DishUseCase):
 
 
 class DeleteDish(DishUseCase):
-    async def __call__(self, menu_id: str, submenu_id: str, dish_id: str):
+    async def __call__(self, menu_id: str, submenu_id: str, dish_id: str) -> None:
         dish_obj = await self.uow.menu_holder.dish_repo.get_by_submenu_and_id(
             submenu_id, dish_id
         )
@@ -102,7 +105,9 @@ class DeleteDish(DishUseCase):
             await clean_cache(self.cache, menu_id, submenu_id, dish_id)
 
             logger.info("Dish was deleted - %s", dish_obj.title)
-            return dish_obj
+            return
+
+        raise DishNotExists
 
 
 class PatchDish(DishUseCase):
@@ -126,17 +131,15 @@ class DishService:
         self.uow = uow
         self.cache = cache
 
-    async def get_dishes(self, menu_id: str, submenu_id: str) -> list[Dish]:
+    async def get_dishes(
+        self, menu_id: str, submenu_id: str
+    ) -> list[OutputDish] | str | None:
         return await GetDishes(self.uow, self.cache)(menu_id, submenu_id)
 
-    async def get_dish(self, submenu_id: str, dish_id: str) -> Dish:
-        dish = await GetDish(self.uow, self.cache)(submenu_id, dish_id)
-        if dish:
-            return dish
+    async def get_dish(self, submenu_id: str, dish_id: str) -> OutputDish | str:
+        return await GetDish(self.uow, self.cache)(submenu_id, dish_id)
 
-        raise DishNotExists
-
-    async def create_dish(self, data: CreateDish) -> Dish:
+    async def create_dish(self, data: CreateDish) -> OutputDish:
         if await self.uow.menu_holder.submenu_repo.get_by_menu_id(
             data.menu_id, load=False
         ):
@@ -144,20 +147,12 @@ class DishService:
         raise SubMenuNotExists
 
     async def delete_dish(self, menu_id: str, submenu_id: str, dish_id: str) -> None:
-        dish = await DeleteDish(self.uow, self.cache)(menu_id, submenu_id, dish_id)
-        if dish:
-            return
+        return await DeleteDish(self.uow, self.cache)(menu_id, submenu_id, dish_id)
 
-        raise DishNotExists
-
-    async def update_dish(self, data: UpdateDish) -> OutputDish:
+    async def update_dish(self, data: UpdateDish) -> OutputDish | str:
         await PatchDish(self.uow, self.cache)(
             data.submenu_id,
             data.dish_id,
             data.dict(exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}),
         )
-        updated_obj = await GetDish(self.uow, self.cache)(data.submenu_id, data.dish_id)
-        if updated_obj:
-            return updated_obj
-
-        raise DishNotExists
+        return await GetDish(self.uow, self.cache)(data.submenu_id, data.dish_id)

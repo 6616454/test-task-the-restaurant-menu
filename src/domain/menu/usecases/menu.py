@@ -12,7 +12,6 @@ from src.domain.menu.exceptions.menu import (
 )
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import MenuUseCase
-from src.infrastructure.db.models.menu import Menu
 from src.infrastructure.db.models.submenu import SubMenu
 
 logger = logging.getLogger("main_logger")
@@ -32,7 +31,7 @@ async def get_len(sub_menus: list[SubMenu], dishes: bool = False) -> int:
 
 
 class GetMenu(MenuUseCase):
-    async def __call__(self, menu_id: str, load: bool) -> str | OutputMenu:  # type: ignore
+    async def __call__(self, menu_id: str, load: bool) -> OutputMenu | str:
         cache = await self.cache.get(menu_id)
         if cache:
             return json.loads(cache)
@@ -43,6 +42,8 @@ class GetMenu(MenuUseCase):
             ).dict()
             await self.cache.put(menu_id, json.dumps(result_menu))
             return result_menu
+
+        raise MenuNotExists
 
 
 class GetMenus(MenuUseCase):
@@ -86,7 +87,7 @@ class AddMenu(MenuUseCase):
 
 
 class DeleteMenu(MenuUseCase):
-    async def __call__(self, menu_id: str) -> Menu | None:  # type: ignore
+    async def __call__(self, menu_id: str) -> None:
         menu_obj = await self.uow.menu_holder.menu_repo.get_by_id(menu_id)
         if menu_obj:
             await self.uow.menu_holder.menu_repo.delete(menu_obj)
@@ -96,7 +97,9 @@ class DeleteMenu(MenuUseCase):
             await self.cache.delete("menus")
 
             logger.info("Menu was deleted - %s", menu_obj.title)
-            return menu_obj
+            return
+
+        raise MenuNotExists
 
 
 class PatchMenu(MenuUseCase):
@@ -128,26 +131,14 @@ class MenuService:
     async def get_menus(self) -> list[OutputMenu] | str | None:
         return await GetMenus(self.uow, self.cache)()
 
-    async def get_menu(self, menu_id: str) -> OutputMenu | str | MenuNotExists:
-        menu = await GetMenu(self.uow, self.cache)(menu_id, load=True)
-        if menu:
-            return menu
-        raise MenuNotExists
+    async def get_menu(self, menu_id: str) -> OutputMenu | str:
+        return await GetMenu(self.uow, self.cache)(menu_id, load=True)
 
     async def delete_menu(self, menu_id: str) -> None:
-        menu = await DeleteMenu(self.uow, self.cache)(menu_id)
-        if menu:
-            return
-        raise MenuNotExists
+        return await DeleteMenu(self.uow, self.cache)(menu_id)
 
-    async def update_menu(
-        self, data: UpdateMenu
-    ) -> OutputMenu | str | MenuNotExists | MenuDataEmpty:
+    async def update_menu(self, data: UpdateMenu) -> OutputMenu | str:
         await PatchMenu(self.uow, self.cache)(
             data.menu_id, data.dict(exclude_none=True, exclude={"menu_id"})
         )
-        menu = await GetMenu(self.uow, self.cache)(data.menu_id, load=True)
-        if menu:
-            return menu
-
-        raise MenuNotExists
+        return await GetMenu(self.uow, self.cache)(data.menu_id, load=True)

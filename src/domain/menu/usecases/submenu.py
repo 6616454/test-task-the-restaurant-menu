@@ -13,7 +13,6 @@ from src.domain.menu.exceptions.submenu import (
 )
 from src.domain.menu.interfaces.uow import IMenuUoW
 from src.domain.menu.interfaces.usecases import SubMenuUseCase
-from src.infrastructure.db.models.submenu import SubMenu
 
 logger = logging.getLogger("main_logger")
 
@@ -33,6 +32,8 @@ class GetSubMenu(SubMenuUseCase):
                 submenu_id, json.dumps(submenu.to_dto(len(submenu.dishes)).dict())
             )
             return submenu.to_dto(len(submenu.dishes))
+
+        raise SubMenuNotExists
 
 
 class GetSubMenus(SubMenuUseCase):
@@ -79,7 +80,7 @@ class AddSubMenu(SubMenuUseCase):
 
 
 class DeleteSubMenu(SubMenuUseCase):
-    async def __call__(self, menu_id: str, submenu_id: str) -> SubMenu:  # type: ignore
+    async def __call__(self, menu_id: str, submenu_id: str) -> None:
         submenu_obj = await self.uow.menu_holder.submenu_repo.get_by_menu_and_id(
             menu_id, submenu_id, load=False
         )
@@ -94,7 +95,9 @@ class DeleteSubMenu(SubMenuUseCase):
 
             logger.info("Submenu was deleted - %s", submenu_obj.title)
 
-            return submenu_obj
+            return
+
+        raise SubMenuNotExists
 
 
 class PatchSubMenu(SubMenuUseCase):
@@ -122,11 +125,7 @@ class SubMenuService:
         self.cache = cache
 
     async def delete_submenu(self, menu_id: str, submenu_id: str) -> None:
-        submenu = await DeleteSubMenu(self.uow, self.cache)(menu_id, submenu_id)
-        if submenu:
-            return
-
-        raise SubMenuNotExists
+        return await DeleteSubMenu(self.uow, self.cache)(menu_id, submenu_id)
 
     async def create_submenu(self, data: CreateSubMenu) -> OutputSubMenu:
         if await self.uow.menu_holder.menu_repo.get_by_id(data.menu_id):
@@ -139,25 +138,15 @@ class SubMenuService:
             data.submenu_id,
             data.dict(exclude_none=True, exclude={"submenu_id", "menu_id"}),
         )
-        new_submenu = await GetSubMenu(self.uow, self.cache)(
+        return await GetSubMenu(self.uow, self.cache)(
             data.menu_id, data.submenu_id, load=True
         )
-        if new_submenu:
-            return new_submenu
-        raise SubMenuNotExists
 
-    async def get_submenus(
-        self, menu_id: str
-    ) -> list[OutputSubMenu] | str | MenuNotExists:
+    async def get_submenus(self, menu_id: str) -> list[OutputSubMenu] | str | None:
         if await self.uow.menu_holder.menu_repo.get_by_id(menu_id):
-            submenus = await GetSubMenus(self.uow, self.cache)(menu_id)
-            return submenus  # type: ignore
+            return await GetSubMenus(self.uow, self.cache)(menu_id)
 
         raise MenuNotExists
 
     async def get_submenu(self, menu_id: str, submenu_id: str) -> OutputSubMenu | str:
-        submenu = await GetSubMenu(self.uow, self.cache)(menu_id, submenu_id, load=True)
-        if submenu:
-            return submenu
-
-        raise SubMenuNotExists
+        return await GetSubMenu(self.uow, self.cache)(menu_id, submenu_id, load=True)
