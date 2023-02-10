@@ -4,7 +4,7 @@ import logging
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from src.domain.common.interfaces.cache import ICache
-from src.domain.menu.dto.dish import CreateDish, UpdateDish
+from src.domain.menu.dto.dish import CreateDish, OutputDish, UpdateDish
 from src.domain.menu.exceptions.dish import (
     DishAlreadyExists,
     DishDataEmpty,
@@ -65,7 +65,7 @@ class GetDish(DishUseCase):
 
 
 class AddDish(DishUseCase):
-    async def __call__(self, data: CreateDish) -> Dish:
+    async def __call__(self, data: CreateDish) -> OutputDish:
         new_dish = self.uow.menu_holder.dish_repo.model(
             title=data.title,
             description=data.description,
@@ -73,8 +73,12 @@ class AddDish(DishUseCase):
             submenu_id=data.submenu_id,
         )
 
-        await self.uow.menu_holder.dish_repo.save(new_dish)
-        await self.uow.commit()
+        try:
+            await self.uow.menu_holder.dish_repo.save(new_dish)
+            await self.uow.commit()
+        except IntegrityError:
+            raise DishAlreadyExists
+
         await self.uow.menu_holder.dish_repo.refresh(new_dish)
 
         await clean_cache(self.cache, data.menu_id, data.submenu_id)
@@ -103,8 +107,13 @@ class DeleteDish(DishUseCase):
 
 class PatchDish(DishUseCase):
     async def __call__(self, submenu_id: str, dish_id: str, data: dict) -> None:
-        await self.uow.menu_holder.dish_repo.update_obj(dish_id, **data)
-        await self.uow.commit()
+        try:
+            await self.uow.menu_holder.dish_repo.update_obj(dish_id, **data)
+            await self.uow.commit()
+        except IntegrityError:
+            raise DishAlreadyExists
+        except ProgrammingError:
+            raise DishDataEmpty
 
         logger.info("Dish was updated - %s", dish_id)
 
@@ -128,14 +137,11 @@ class DishService:
         raise DishNotExists
 
     async def create_dish(self, data: CreateDish) -> Dish:
-        try:
-            if await self.uow.menu_holder.submenu_repo.get_by_menu_id(
-                data.menu_id, load=False
-            ):
-                return await AddDish(self.uow, self.cache)(data)
-            raise SubMenuNotExists
-        except IntegrityError:
-            raise DishAlreadyExists
+        if await self.uow.menu_holder.submenu_repo.get_by_menu_id(
+            data.menu_id, load=False
+        ):
+            return await AddDish(self.uow, self.cache)(data)
+        raise SubMenuNotExists
 
     async def delete_dish(self, menu_id: str, submenu_id: str, dish_id: str) -> None:
         dish = await DeleteDish(self.uow, self.cache)(menu_id, submenu_id, dish_id)
@@ -144,22 +150,14 @@ class DishService:
 
         raise DishNotExists
 
-    async def update_dish(self, data: UpdateDish) -> Dish:
-        try:
-            await PatchDish(self.uow, self.cache)(
-                data.submenu_id,
-                data.dish_id,
-                data.dict(
-                    exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}
-                ),
-            )
-            updated_obj = await GetDish(self.uow, self.cache)(
-                data.submenu_id, data.dish_id
-            )
-            if updated_obj:
-                return updated_obj
-            raise DishNotExists
-        except ProgrammingError:
-            raise DishDataEmpty
-        except IntegrityError:
-            raise DishAlreadyExists
+    async def update_dish(self, data: UpdateDish) -> OutputDish:
+        await PatchDish(self.uow, self.cache)(
+            data.submenu_id,
+            data.dish_id,
+            data.dict(exclude_none=True, exclude={"menu_id", "submenu_id", "dish_id"}),
+        )
+        updated_obj = await GetDish(self.uow, self.cache)(data.submenu_id, data.dish_id)
+        if updated_obj:
+            return updated_obj
+
+        raise DishNotExists

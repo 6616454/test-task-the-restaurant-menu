@@ -70,8 +70,11 @@ class AddMenu(MenuUseCase):
             title=data.title, description=data.description
         )
 
-        await self.uow.menu_holder.menu_repo.save(menu)
-        await self.uow.commit()
+        try:
+            await self.uow.menu_holder.menu_repo.save(menu)
+            await self.uow.commit()
+        except IntegrityError:
+            raise MenuAlreadyExists
         await self.uow.menu_holder.menu_repo.refresh(menu)
 
         await self.cache.put(str(menu.id), json.dumps(menu.to_dto().dict()))
@@ -98,8 +101,13 @@ class DeleteMenu(MenuUseCase):
 
 class PatchMenu(MenuUseCase):
     async def __call__(self, menu_id: str, data: dict) -> None:
-        await self.uow.menu_holder.menu_repo.update_obj(menu_id, **data)
-        await self.uow.commit()
+        try:
+            await self.uow.menu_holder.menu_repo.update_obj(menu_id, **data)
+            await self.uow.commit()
+        except IntegrityError:
+            raise MenuAlreadyExists
+        except ProgrammingError:
+            raise MenuDataEmpty
 
         logger.info("Menus was updated - %s", menu_id)
 
@@ -115,11 +123,7 @@ class MenuService:
         self.cache = cache
 
     async def create_menu(self, data: CreateMenu) -> OutputMenu:
-        try:
-            return await AddMenu(self.uow, self.cache)(data)
-        except IntegrityError:
-            await self.uow.rollback()
-        raise MenuAlreadyExists
+        return await AddMenu(self.uow, self.cache)(data)
 
     async def get_menus(self) -> list[OutputMenu] | str | None:
         return await GetMenus(self.uow, self.cache)()
@@ -139,16 +143,11 @@ class MenuService:
     async def update_menu(
         self, data: UpdateMenu
     ) -> OutputMenu | str | MenuNotExists | MenuDataEmpty:
-        try:
-            await PatchMenu(self.uow, self.cache)(
-                data.menu_id, data.dict(exclude_none=True, exclude={"menu_id"})
-            )
-            menu = await GetMenu(self.uow, self.cache)(data.menu_id, load=True)
-            if menu:
-                return menu
+        await PatchMenu(self.uow, self.cache)(
+            data.menu_id, data.dict(exclude_none=True, exclude={"menu_id"})
+        )
+        menu = await GetMenu(self.uow, self.cache)(data.menu_id, load=True)
+        if menu:
+            return menu
 
-            raise MenuNotExists
-        except IntegrityError:
-            raise MenuAlreadyExists
-        except ProgrammingError:
-            raise MenuDataEmpty
+        raise MenuNotExists

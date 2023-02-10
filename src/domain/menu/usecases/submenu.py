@@ -37,22 +37,21 @@ class GetSubMenu(SubMenuUseCase):
 
 class GetSubMenus(SubMenuUseCase):
     async def __call__(self, menu_id: str) -> list[OutputSubMenu] | str | None:  # type: ignore
-        if await self.uow.menu_holder.menu_repo.get_by_id(menu_id):
-            cache = await self.cache.get(f"submenus-{menu_id}")
-            if cache:
-                return cache
+        cache = await self.cache.get(f"submenus-{menu_id}")
+        if cache:
+            return cache
 
-            submenus = await self.uow.menu_holder.submenu_repo.get_by_menu_id(
-                menu_id, load=True
-            )
-            if submenus:
-                output_submenus = [
-                    submenu.to_dto(len(submenu.dishes)).dict() for submenu in submenus
-                ]
-                await self.cache.put(f"submenus-{menu_id}", json.dumps(output_submenus))
-                return output_submenus
+        submenus = await self.uow.menu_holder.submenu_repo.get_by_menu_id(
+            menu_id, load=True
+        )
+        if submenus:
+            output_submenus = [
+                submenu.to_dto(len(submenu.dishes)).dict() for submenu in submenus
+            ]
+            await self.cache.put(f"submenus-{menu_id}", json.dumps(output_submenus))
+            return output_submenus
 
-            return submenus
+        return submenus
 
 
 class AddSubMenu(SubMenuUseCase):
@@ -60,9 +59,12 @@ class AddSubMenu(SubMenuUseCase):
         submenu = self.uow.menu_holder.submenu_repo.model(
             title=data.title, description=data.description, menu_id=data.menu_id
         )
+        try:
+            await self.uow.menu_holder.submenu_repo.save(submenu)
+            await self.uow.commit()
+        except IntegrityError:
+            raise SubMenuNotExists
 
-        await self.uow.menu_holder.submenu_repo.save(submenu)
-        await self.uow.commit()
         await self.uow.menu_holder.submenu_repo.refresh(submenu)
 
         await self.cache.delete(f"submenus-{data.menu_id}")
@@ -97,8 +99,13 @@ class DeleteSubMenu(SubMenuUseCase):
 
 class PatchSubMenu(SubMenuUseCase):
     async def __call__(self, menu_id: str, submenu_id: str, data: dict) -> None:
-        await self.uow.menu_holder.submenu_repo.update_obj(submenu_id, **data)
-        await self.uow.commit()
+        try:
+            await self.uow.menu_holder.submenu_repo.update_obj(submenu_id, **data)
+            await self.uow.commit()
+        except IntegrityError:
+            raise SubMenuAlreadyExists
+        except ProgrammingError:
+            raise SubMenuDataEmpty
 
         logger.info("Submenu was updated - %s", submenu_id)
 
@@ -122,42 +129,31 @@ class SubMenuService:
         raise SubMenuNotExists
 
     async def create_submenu(self, data: CreateSubMenu) -> OutputSubMenu:
-        try:
-            if await self.uow.menu_holder.menu_repo.get_by_id(data.menu_id):
-                return await AddSubMenu(self.uow, self.cache)(data)
-            raise MenuNotExists
-        except IntegrityError:
-            await self.uow.rollback()
-
-            raise SubMenuAlreadyExists
+        if await self.uow.menu_holder.menu_repo.get_by_id(data.menu_id):
+            return await AddSubMenu(self.uow, self.cache)(data)
+        raise MenuNotExists
 
     async def update_submenu(self, data: UpdateSubMenu) -> OutputSubMenu | str:
-        try:
-            await PatchSubMenu(self.uow, self.cache)(
-                data.menu_id,
-                data.submenu_id,
-                data.dict(exclude_none=True, exclude={"submenu_id", "menu_id"}),
-            )
-            new_submenu = await GetSubMenu(self.uow, self.cache)(
-                data.menu_id, data.submenu_id, load=True
-            )
-            if new_submenu:
-                return new_submenu
-            raise SubMenuNotExists
-        except IntegrityError:
-            raise SubMenuAlreadyExists
-        except ProgrammingError:
-            raise SubMenuDataEmpty
+        await PatchSubMenu(self.uow, self.cache)(
+            data.menu_id,
+            data.submenu_id,
+            data.dict(exclude_none=True, exclude={"submenu_id", "menu_id"}),
+        )
+        new_submenu = await GetSubMenu(self.uow, self.cache)(
+            data.menu_id, data.submenu_id, load=True
+        )
+        if new_submenu:
+            return new_submenu
+        raise SubMenuNotExists
 
     async def get_submenus(
         self, menu_id: str
     ) -> list[OutputSubMenu] | str | MenuNotExists:
-        submenus = await GetSubMenus(self.uow, self.cache)(menu_id)
+        if await self.uow.menu_holder.menu_repo.get_by_id(menu_id):
+            submenus = await GetSubMenus(self.uow, self.cache)(menu_id)
+            return submenus  # type: ignore
 
-        if submenus is None and not isinstance(submenus, list):
-            raise MenuNotExists
-
-        return submenus
+        raise MenuNotExists
 
     async def get_submenu(self, menu_id: str, submenu_id: str) -> OutputSubMenu | str:
         submenu = await GetSubMenu(self.uow, self.cache)(menu_id, submenu_id, load=True)
