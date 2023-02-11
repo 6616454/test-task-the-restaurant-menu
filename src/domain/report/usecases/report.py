@@ -11,7 +11,7 @@ from src.domain.report.interfaces.usecases import ReportUseCase
 
 
 class GetReportData(ReportUseCase):
-    async def __call__(self):
+    async def __call__(self) -> list[dict]:
         result = []
 
         menus = await self.uow.menu_holder.menu_repo.get_all()
