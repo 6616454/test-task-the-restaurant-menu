@@ -1,8 +1,7 @@
 import json
 import logging
 
-from sqlalchemy.exc import IntegrityError, ProgrammingError
-
+from src.domain.common.exceptions.repo import DataEmptyError, UniqueError
 from src.domain.common.interfaces.cache import ICache
 from src.domain.menu.dto.submenu import CreateSubMenu, OutputSubMenu, UpdateSubMenu
 from src.domain.menu.exceptions.menu import MenuNotExists
@@ -57,26 +56,23 @@ class GetSubMenus(SubMenuUseCase):
 
 class AddSubMenu(SubMenuUseCase):
     async def __call__(self, data: CreateSubMenu) -> OutputSubMenu:
-        submenu = self.uow.menu_holder.submenu_repo.model(
-            title=data.title, description=data.description, menu_id=data.menu_id
-        )
         try:
-            await self.uow.menu_holder.submenu_repo.save(submenu)
+            new_submenu = await self.uow.menu_holder.submenu_repo.create_submenu(data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise SubMenuNotExists
-
-        await self.uow.menu_holder.submenu_repo.refresh(submenu)
 
         await self.cache.delete(f"submenus-{data.menu_id}")
         await self.cache.delete(data.menu_id)
         await self.cache.delete("menus")
 
-        await self.cache.put(str(submenu.id), json.dumps(submenu.to_dto().dict()))
+        await self.cache.put(
+            str(new_submenu.id), json.dumps(new_submenu.to_dto().dict())
+        )
 
         logger.info("New submenu - %s", data.title)
 
-        return submenu.to_dto()
+        return new_submenu.to_dto()
 
 
 class DeleteSubMenu(SubMenuUseCase):
@@ -105,9 +101,9 @@ class PatchSubMenu(SubMenuUseCase):
         try:
             await self.uow.menu_holder.submenu_repo.update_obj(submenu_id, **data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise SubMenuAlreadyExists
-        except ProgrammingError:
+        except DataEmptyError:
             raise SubMenuDataEmpty
 
         logger.info("Submenu was updated - %s", submenu_id)

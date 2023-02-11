@@ -1,6 +1,8 @@
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.domain.menu.dto.dish import CreateDish
+from src.infrastructure.db.exception_mapper import exception_mapper
 from src.infrastructure.db.models.dish import Dish
 from src.infrastructure.db.repositories.base import BaseRepository
 
@@ -18,3 +20,16 @@ class DishRepository(BaseRepository[Dish]):
             and_(self.model.id == dish_id, self.model.submenu_id == submenu_id)
         )
         return (await self.session.execute(query)).scalar()
+
+    @exception_mapper
+    async def create_dish(self, dish: CreateDish) -> Dish:
+        new_dish = self.model(
+            title=dish.title,
+            description=dish.description,
+            price=dish.price,
+            submenu_id=dish.submenu_id,
+        )
+        await self.save(new_dish)
+        await self.session.flush()
+
+        return new_dish

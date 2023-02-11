@@ -2,6 +2,8 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.domain.menu.dto.submenu import CreateSubMenu
+from src.infrastructure.db.exception_mapper import exception_mapper
 from src.infrastructure.db.models.submenu import SubMenu
 from src.infrastructure.db.repositories.base import BaseRepository
 
@@ -42,3 +44,14 @@ class SubMenuRepository(BaseRepository[SubMenu]):
 
         result = (await self.session.execute(query)).scalar()
         return result
+
+    @exception_mapper
+    async def create_submenu(self, data: CreateSubMenu) -> SubMenu:
+        new_submenu = self.model(
+            title=data.title, description=data.description, menu_id=data.menu_id
+        )
+
+        self.session.add(new_submenu)
+        await self.session.flush()
+
+        return new_submenu

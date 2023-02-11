@@ -1,8 +1,7 @@
 import json
 import logging
 
-from sqlalchemy.exc import IntegrityError, ProgrammingError
-
+from src.domain.common.exceptions.repo import DataEmptyError, UniqueError
 from src.domain.common.interfaces.cache import ICache
 from src.domain.menu.dto.dish import CreateDish, OutputDish, UpdateDish
 from src.domain.menu.exceptions.dish import (
@@ -66,20 +65,11 @@ class GetDish(DishUseCase):
 
 class AddDish(DishUseCase):
     async def __call__(self, data: CreateDish) -> OutputDish:
-        new_dish = self.uow.menu_holder.dish_repo.model(
-            title=data.title,
-            description=data.description,
-            price=data.price,
-            submenu_id=data.submenu_id,
-        )
-
         try:
-            await self.uow.menu_holder.dish_repo.save(new_dish)
+            new_dish = await self.uow.menu_holder.dish_repo.create_dish(data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise DishAlreadyExists
-
-        await self.uow.menu_holder.dish_repo.refresh(new_dish)
 
         await clean_cache(self.cache, data.menu_id, data.submenu_id)
 
@@ -112,9 +102,9 @@ class PatchDish(DishUseCase):
         try:
             await self.uow.menu_holder.dish_repo.update_obj(dish_id, **data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise DishAlreadyExists
-        except ProgrammingError:
+        except DataEmptyError:
             raise DishDataEmpty
 
         logger.info("Dish was updated - %s", dish_id)

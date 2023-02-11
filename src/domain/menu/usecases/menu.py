@@ -1,8 +1,7 @@
 import json
 import logging
 
-from sqlalchemy.exc import IntegrityError, ProgrammingError
-
+from src.domain.common.exceptions.repo import DataEmptyError, UniqueError
 from src.domain.common.interfaces.cache import ICache
 from src.domain.menu.dto.menu import CreateMenu, OutputMenu, UpdateMenu
 from src.domain.menu.exceptions.menu import (
@@ -67,23 +66,18 @@ class GetMenus(MenuUseCase):
 
 class AddMenu(MenuUseCase):
     async def __call__(self, data: CreateMenu) -> OutputMenu:
-        menu = self.uow.menu_holder.menu_repo.model(
-            title=data.title, description=data.description
-        )
-
         try:
-            await self.uow.menu_holder.menu_repo.save(menu)
+            new_menu = await self.uow.menu_holder.menu_repo.create_menu(data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise MenuAlreadyExists
-        await self.uow.menu_holder.menu_repo.refresh(menu)
 
-        await self.cache.put(str(menu.id), json.dumps(menu.to_dto().dict()))
+        await self.cache.put(str(new_menu.id), json.dumps(new_menu.to_dto().dict()))
         await self.cache.delete("menus")
 
         logger.info("New menu - %s", data.title)
 
-        return menu.to_dto()
+        return new_menu.to_dto()
 
 
 class DeleteMenu(MenuUseCase):
@@ -107,9 +101,9 @@ class PatchMenu(MenuUseCase):
         try:
             await self.uow.menu_holder.menu_repo.update_obj(menu_id, **data)
             await self.uow.commit()
-        except IntegrityError:
+        except UniqueError:
             raise MenuAlreadyExists
-        except ProgrammingError:
+        except DataEmptyError:
             raise MenuDataEmpty
 
         logger.info("Menus was updated - %s", menu_id)
