@@ -124,7 +124,7 @@ class DishService:
         # if await self.uow.menu_holder.submenu_repo.get_by_menu_id(menu_id, load=False):
         return await GetDishes(self.uow, self.cache)(submenu_id)
         # raiseSubMenuNotExists ЗАКОММЕНТИРОВАЛ, Т.К.
-        # ошибка мешает тестам в постмане, но по логике должно присутствовать
+        # ошибка мешает тестам в постмане, но по логике должна присутствовать
 
     async def get_dish(self, submenu_id: str, dish_id: str) -> OutputDish | str:
         return await GetDish(self.uow, self.cache)(submenu_id, dish_id)
