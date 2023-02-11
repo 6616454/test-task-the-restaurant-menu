@@ -27,11 +27,5 @@ class BaseRepository(Generic[Model]):
         query = update(self.model).where(self.model.id == id_).values(kwargs)
         await self.session.execute(query)
 
-    async def save(self, obj: Model) -> None:
-        self.session.add(obj)
-
     async def delete(self, obj: Model) -> None:
         await self.session.delete(obj)
-
-    async def refresh(self, obj: Model) -> None:
-        await self.session.refresh(obj)
