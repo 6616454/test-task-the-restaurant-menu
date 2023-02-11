@@ -7,3 +7,7 @@ class RepositoryError(AppException):
 
 class UniqueError(RepositoryError):
     pass
+
+
+class DataEmptyError(RepositoryError):
+    pass

@@ -1,9 +1,10 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Any
+from typing import Any
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from src.domain.common.exceptions.repo import UniqueError
+from src.domain.common.exceptions.repo import DataEmptyError, UniqueError
 
 
 def exception_mapper(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -13,5 +14,7 @@ def exception_mapper(func: Callable[..., Any]) -> Callable[..., Any]:
             return await func(*args, **kwargs)
         except IntegrityError:
             raise UniqueError
+        except ProgrammingError:
+            raise DataEmptyError
 
     return wrapped
