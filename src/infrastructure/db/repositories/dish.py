@@ -29,7 +29,7 @@ class DishRepository(BaseRepository[Dish]):
             price=dish.price,
             submenu_id=dish.submenu_id,
         )
-        await self.save(new_dish)
+        self.session.add(new_dish)
         await self.session.flush()
 
         return new_dish
