@@ -85,9 +85,7 @@ async def clean_tables(db_session_test):
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def clean_cache(get_cache):
-    async for key in get_cache.scan_iter():
-        await get_cache.delete(key)
-
+    await get_cache.flushdb()
 
 @pytest_asyncio.fixture(scope="function")
 async def create_menu_in_database(db_session_test: sessionmaker):
