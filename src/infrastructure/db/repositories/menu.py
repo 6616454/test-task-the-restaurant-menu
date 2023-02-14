@@ -14,30 +14,30 @@ class MenuRepository(BaseRepository[Menu]):
         super().__init__(Menu, session)
 
     async def get_all(self) -> list[Menu]:
-        query = select(self.model).options(
-            joinedload(self.model.submenus).joinedload(SubMenu.dishes)
+        query = select(self._model).options(
+            joinedload(self._model.submenus).joinedload(SubMenu.dishes)
         )
-        result = (await self.session.execute(query)).unique().scalars().all()
+        result = (await self._session.execute(query)).unique().scalars().all()
         return result
 
     async def get_by_id_all(self, id_: str, load: bool) -> Menu:
-        query = select(self.model).where(self.model.id == id_)
+        query = select(self._model).where(self._model.id == id_)
         if load:
             query = query.options(
-                joinedload(self.model.submenus).joinedload(SubMenu.dishes)
+                joinedload(self._model.submenus).joinedload(SubMenu.dishes)
             )
-        result = (await self.session.execute(query)).scalar()
+        result = (await self._session.execute(query)).scalar()
         return result
 
     async def delete_by_id(self, id_: str) -> None:
-        query = delete(self.model).where(self.model.id == id_)
-        await self.session.execute(query)
+        query = delete(self._model).where(self._model.id == id_)
+        await self._session.execute(query)
 
     @exception_mapper
     async def create_menu(self, data: CreateMenu) -> Menu:
-        new_menu = self.model(title=data.title, description=data.description)
+        new_menu = self._model(title=data.title, description=data.description)
 
-        self.session.add(new_menu)
-        await self.session.flush()
+        self._session.add(new_menu)
+        await self._session.flush()
 
         return new_menu
