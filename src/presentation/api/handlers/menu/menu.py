@@ -133,11 +133,13 @@ async def update_menu(
     description="Creating test data for test use application",
 )
 async def create_test_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
-    FirstMenu = uow.menu_holder.menu_repo.model(
+    """Endpoint for the examiner"""
+
+    FirstMenu = uow.menu_holder.menu_repo._model(
         id=str(uuid.uuid4()), title="Первое меню", description="Описание первого меню"
     )
 
-    SecondMenu = uow.menu_holder.menu_repo.model(
+    SecondMenu = uow.menu_holder.menu_repo._model(
         id=str(uuid.uuid4()), title="Второе меню", description="Описание второго меню"
     )
 
@@ -146,19 +148,19 @@ async def create_test_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
 
     await uow.commit()
 
-    FirstSubMenu = uow.menu_holder.submenu_repo.model(
+    FirstSubMenu = uow.menu_holder.submenu_repo._model(
         id=str(uuid.uuid4()),
         title="Первое подменю",
         description="Описание первого подменю",
         menu_id=FirstMenu.id,
     )
-    SecondSubMenu = uow.menu_holder.submenu_repo.model(
+    SecondSubMenu = uow.menu_holder.submenu_repo._model(
         id=str(uuid.uuid4()),
         title="Второе подменю",
         description="Описание второго подменю",
         menu_id=FirstMenu.id,
     )
-    ThirdSubMenu = uow.menu_holder.submenu_repo.model(
+    ThirdSubMenu = uow.menu_holder.submenu_repo._model(
         id=str(uuid.uuid4()),
         title="Третье подменю",
         description="Описание третьего подменю",
@@ -171,7 +173,7 @@ async def create_test_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
 
     await uow.commit()
 
-    FirstDish = uow.menu_holder.dish_repo.model(
+    FirstDish = uow.menu_holder.dish_repo._model(
         id=str(uuid.uuid4()),
         title="Название первого блюда",
         description="Описание первого блюда",
@@ -179,21 +181,21 @@ async def create_test_data(uow: SQLAlchemyUoW = Depends(uow_provider)) -> None:
         submenu_id=FirstSubMenu.id,
     )
 
-    SecondDish = uow.menu_holder.dish_repo.model(
+    SecondDish = uow.menu_holder.dish_repo._model(
         id=str(uuid.uuid4()),
         title="Название второго блюда",
         description="Описание второго блюда",
         price="123.12",
         submenu_id=FirstSubMenu.id,
     )
-    ThirdDish = uow.menu_holder.dish_repo.model(
+    ThirdDish = uow.menu_holder.dish_repo._model(
         id=str(uuid.uuid4()),
         title="Название третьего блюда",
         description="Описание третьего блюда",
         price="250.12",
         submenu_id=SecondSubMenu.id,
     )
-    FourthDish = uow.menu_holder.dish_repo.model(
+    FourthDish = uow.menu_holder.dish_repo._model(
         id=str(uuid.uuid4()),
         title="Название четвертого блюда",
         description="Описание четвертого блюда",
